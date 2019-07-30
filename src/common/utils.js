@@ -747,25 +747,47 @@ export const formatMoney = (row, column) => {
 	}
 	return val
 }
+export const getWebsocketURL = () =>{
+  var websocketurl = ''
+  let hostname = window.location.host
+ 	if(hostname == 'localhost:8080'){
+  	websocketurl = 'ws://99.48.68.96:8092'
+  }else if(hostname == 'customer-web.lovehaimi.com'){
+    websocketurl = 'wss://customer.lovehaimi.com'
+  }else{
+  	 websocketurl = 'wss://customer.lovehaimi.com'
+  }
+  return websocketurl
+}
+export const toEmotion =(text) => {
+		var list = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10','11', '12', '13', '14', '15', '16', '17', '18', '19', '20','21', 
+		'22', '23', '24', '25', '26', '27', '28', '29', '30','31', '32', '33','34','35', '36', '37', '38', '39', 
+		'40','41', '42', '43', '44', '45', '46', '47', '48', '49', '50','51', '52', '53', '54', '55', 
+		'56','57','58','59','60','61','62','63','64','65','66','67']
+		if(!text) {
+			return text;
+		}
+		//判断[]中括号里是否是数字
+		text = text.replace(/\[[\d]{1,3}\]/gi, function(word) {
+			var newWord = word.replace(/\[|\]/gi, ''); //去掉[]符号
+			var index = list.indexOf(newWord) + 1;
+			var imgHTML = '';
+			if(index <=0 ) {
+				return word;
+			}else{
+				var path = 'http://99.48.68.109:92';
+				imgHTML = `<img class="static-emotion-gif" style="vertical-align: middle;width:20px;margin-top: -4px;" src="${path}/emotion/${index}.png">`
+				return imgHTML;
+			}
+			
+		});
+		return text;
+}
 export default {
 	dateFormat: function(row, column) {
 		var date = row[column.property];
 		return date ? dateFormatter(new Date(date).getTime(), 'yyyy-MM-dd HH:mm:ss') : '/';
 	},
-	/* getId:function(scheduledList,arrlist){
-	console.log(scheduledList)
-	console.log(arrlist)
-	let arrName = ''
-	for(var j = 0;j<scheduledList.length;j++){
-		for(var i=0;i<arrlist.length;i++){
-		if(scheduledList[j].id == arrlist[i].id){
-			arrName = arrlist[i].name
-			console.log(arrName)
-		}
-	}
-	}
-	return arrName
-},*/
 	validator,
 	dateFormatter,
 	storageCan,
@@ -790,5 +812,7 @@ export default {
 	getStatusVal,
 	getproductStatusVal,
 	getReturnStatusVal,
-	formatMoney
+	formatMoney,
+	getWebsocketURL,
+	toEmotion
 }
