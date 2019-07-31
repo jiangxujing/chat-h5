@@ -16,7 +16,8 @@ import {
     Popup,
     Loadmore,
     Swipe,
-    SwipeItem
+    SwipeItem,
+    Spinner 
 } from 'mint-ui'
 Vue.component(Toast.name, Toast)
 Vue.component(MessageBox.name, MessageBox)
@@ -24,6 +25,7 @@ Vue.component(Popup.name, Popup)
 Vue.component(Loadmore.name, Loadmore);
 Vue.component(Swipe.name, Swipe);
 Vue.component(SwipeItem.name, SwipeItem);
+Vue.component(Spinner.name, Spinner);
 Vue.use(MintUI)
 Vue.config.productionTip = false
 Vue.use(ElementUI)

@@ -9,8 +9,9 @@
 						<div style="margin-top:0.8rem" class="fontStyle">{{i.chatContent}}</div>
 					</div>
 				</div>
-				<div class="time">{{i.time}}
-				<div class="unread" v-if="i.read >0">{{i.read}}</div>
+				<div>
+					<div class="time">{{i.time}}</div>
+					<div class="unread" v-if="i.read >0"></div>
 				</div>
 			</div>
 		</mt-loadmore>
@@ -178,7 +179,13 @@
 				margin-top:1rem;
 			}
 			.unread{
-				color:red;
+			    width: 0.6rem;
+			    height: 0.6rem;
+			    border-radius: 50%;
+			    background: #FF4D4D;
+			    float:right;
+			    margin-top:1.5rem;
+			    margin-right:3px;
 			}
 		}
 	}

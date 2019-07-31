@@ -750,8 +750,8 @@ export const formatMoney = (row, column) => {
 export const getWebsocketURL = () =>{
   var websocketurl = ''
   let hostname = window.location.host
- 	if(hostname == 'localhost:8080'){
-  	websocketurl = 'ws://99.48.68.96:8092'
+ 	if(hostname == 'localhost:8081'){
+  	websocketurl = 'ws://99.48.68.111:8092'
   }else if(hostname == 'customer-web.lovehaimi.com'){
     websocketurl = 'wss://customer.lovehaimi.com'
   }else{
