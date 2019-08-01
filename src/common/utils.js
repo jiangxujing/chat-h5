@@ -785,6 +785,9 @@ export const toEmotion =(text) => {
 		});
 		return text;
 }
+export const formatTime =(time) => {
+		return dateFormatter(new Date(time).getTime(), 'yyyy-MM-dd HH:mm:ss');
+}
 export default {
 	dateFormat: function(row, column) {
 		var date = row[column.property];
@@ -816,5 +819,6 @@ export default {
 	getReturnStatusVal,
 	formatMoney,
 	getWebsocketURL,
-	toEmotion
+	toEmotion,
+	formatTime
 }

@@ -1,4 +1,5 @@
 {	
 	"productUpload": "/commerce/resource/productUpload",
-	"getListTopLevel": "/commerce/category/listTopLevel"
+	"getListTopLevel": "/commerce/category/listTopLevel",
+	"getListChatSession":"/memberSession/listChatSession"
   }

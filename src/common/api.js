@@ -31,7 +31,7 @@ function filterNull(o) {
 }
 
 const prefix = '/commerce-web'
-const prefix2 = '/play-web'
+const prefix2 = '/chat'
 
 const _parseJSON = str => {
     if (typeof str === 'object') {

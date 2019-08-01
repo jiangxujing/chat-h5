@@ -12,12 +12,8 @@
 								<p v-html="$utils.toEmotion(l.content)"></p>
 							</div>
 							<div class="myself" v-if="l.direction == 2">
-								<div class="loadingStyle">
-									<mt-spinner type="snake" :size="10" class="spinner" v-if="!l.status"></mt-spinner>
-									<img src="../images/error.jpg" v-if="l.error" style="width:1rem"/>
-									<p v-html="$utils.toEmotion(l.content)"></p>
-								</div>
-								<img :src="l.ownerAvatarUrl" class="touxiang"/>
+								<p v-html="$utils.toEmotion(l.content)"></p>
+								<img :src="l.ownerAvatarUrl" class="touxiang" />
 							</div>
 						</div>
 						<div v-if="l.type == 2">
@@ -27,11 +23,7 @@
 							</div>
 							<div class="myself" v-if="l.direction == 2">
 								<img :src="l.ownerAvatarUrl" class="touxiang" />
-								<div class="loadingStyle">
-									<mt-spinner type="snake" class="spinner" v-if="!l.status"></mt-spinner>
-									<img src="../images/error.jpg" v-if="l.error" style="width:1rem"/>
-									<img :src="l.content" style="width:100px;margin-right:2rem" @click="openImg">
-								</div>
+								<img :src="l.content" style="width:100px;margin-right:2rem" @click="openImg">
 							</div>
 							<div class="bigImg" v-show="bigImgShow" @click="bigImgShow=false">
 								<img :src="l.content" />
@@ -46,7 +38,7 @@
 			<div style="margin-bottom:2rem;margin-left:2rem">
 				<div class="inputBtn">
 					<div contenteditable="true" class="tipsInput" @input="changeText" id="inputs" @focus="focusfns" ref="input">
-						<img :src='item' v-for="item in selectPicLists" style="width:20px;margin-right:5px;vertical-align: middle;" />
+						<img :src='item' v-for="item in selectPicLists" style="width:20px;margin-right:5px" />
 					</div>
 				</div>
 				<img src="../images/biaoqing.png" class="photo" @click="openExpression" style="margin-left:1.5rem" />
@@ -104,6 +96,42 @@
 					active: false
 				}],
 				chatLists: [],
+				//				chatLists: [{
+				//						direction: 2,
+				//						type: 1,
+				//						content: '你好!![1]',
+				//						ctime: new Date().toLocaleString(),
+				//						ownerAvatarUrl: require('../images/wyz.jpg')
+				//					},
+				//					{
+				//						direction: 1,
+				//						type: 1,
+				//						content: '你也好。[3]',
+				//						ctime: new Date().toLocaleString(),
+				//						contactAvatarUrl: require('../images/touxiang.png')
+				//					},
+				//					{
+				//						direction: 2,
+				//						type: 1,
+				//						content: '这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像：',
+				//						ctime: new Date().toLocaleString(),
+				//						ownerAvatarUrl: require('../images/wyz.jpg')
+				//					},
+				//					{
+				//						direction: 2,
+				//						type: 2,
+				//						content: require('../images/wyz.jpg'),
+				//						ctime: new Date().toLocaleString(),
+				//						ownerAvatarUrl: require('../images/wyz.jpg')
+				//					},
+				//					{
+				//						direction: 1,
+				//						type: 1,
+				//						content: '你开心就好。[6]',
+				//						ctime: new Date().toLocaleString(),
+				//						contactAvatarUrl: require('../images/touxiang.png')
+				//					}
+				//				],
 				picLists: [{
 					src: require('../images/1.png'),
 					id: 1
@@ -308,9 +336,9 @@
 				}],
 				selectPicLists: [],
 				sendBtnShow: false,
+				//ws: {},
 				websocketurl: _utils.getWebsocketURL(),
-				obj: {},
-				arr:[]
+				obj: {}
 			}
 		},
 		mounted() {
@@ -339,71 +367,35 @@
 				console.log('gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg')
 				ws.onmessage = (evnt) => {
 					let content = evnt.data;
-					console.log('contentcontentcontentcontentcontentcontentcontent' + typeof(content))
-					if(typeof(content) == 'string'){
-						if(JSON.parse(content).status == 1) {
-							let length = _this.chatLists.length
-							_this.chatLists[length-1].status = true
-						}else if(JSON.parse(content).status == 0){
-							let length = _this.chatLists.length
-							_this.chatLists[length-1].status = true
-							_this.chatLists[length-1].error = true
+					console.log('contentcontentcontentcontentcontentcontentcontent' + content)
+					var reader = new FileReader();
+					let str = ''
+					reader.onload = function(evnt) {
+						str = reader.result; //内容就在这里
+						var f = JSON.parse(str.substring(1))
+						console.log(str)
+						_this.obj = {
+							direction: 1,
+							type: str.substring(0,1),
+							content: f.content,
+							ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+							contactAvatarUrl: require('../images/wyz.jpg')
 						}
-					}else {
-						var reader = new FileReader();
-						let str = ''
-						let obj = {}
-						let arrObj = {}
-						reader.onload = function(evnt) {
-							str = reader.result; //内容就在这里
-							var f = JSON.parse(str.substring(1))
-							console.log(str)
-							obj = {
-								direction: 1,
-								type: str.substring(0, 1),
-								content: f.content,
-								ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-								contactAvatarUrl: require('../images/wyz.jpg')
-							}
-							_this.arr.push(obj)
-							for(var i = 0; i < _this.arr.length; i++) {
-								if(_this.arr[i - 1]) {
-									if(new Date(_this.arr[i].ctime).getTime() - new Date(_this.arr[i - 1].ctime).getTime() < 10000) {
-										console.log('尽力啊没有')
-										arrObj = {
-											direction: 1,
-											type: str.substring(0, 1),
-											content: f.content,
-											contactAvatarUrl: require('../images/wyz.jpg')
-										}
-									} else {
-										console.log('jjjjjjjjjjjjjjjjjjj')
-										arrObj = {
-											direction: 1,
-											type: str.substring(0, 1),
-											content: f.content,
-											ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-											contactAvatarUrl: require('../images/wyz.jpg')
-										}
-									}
-								} else {
-									arrObj = {
-										direction: 1,
-										type: str.substring(0, 1),
-										content: f.content,
-										ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-										contactAvatarUrl: require('../images/wyz.jpg')
-									}
-								}
-							}
-							_this.chatLists.push(arrObj)
-						};
-						reader.readAsText(content);
-						console.log(_this.chatLists)
-					}
+						_this.chatLists.push(_this.obj)
+
+					};
+					reader.readAsText(content);
+					console.log(_this.chatLists)
+					_this.$nextTick(() => {
+						let msg = document.getElementById('content') // 获取对象
+						msg.scrollTop = msg.scrollHeight // 滚动高度
+					})
+					document.getElementById('inputs').innerHTML = ''
+					_this.sendBtnShow = false
+					_this.$refs.input.focus();
 				};
 				ws.onerror = function(evnt) {
-					Toast('网络异常，请重试！')
+					console.log("fail");
 				};
 				ws.onclose = function(evnt) {
 					console.log("session closed now");
@@ -436,63 +428,24 @@
 			sendPic() {
 				api.upload(api.getUrl('productUpload'), this.formData).then(res => {
 					let obj = {}
-					let arrObj = {}
 					if(res.code == '0000') {
 						this.galleryShow = false
 						obj = {
 							direction: 2,
+							id: 1,
 							type: 2,
 							content: 'http://99.48.68.108:83/commerce-web/commerce/resource/getPicture/9cfb37a2c12040a9acbe5e5fb54572ae.jpg',
-							ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+							ctime: new Date().toLocaleString(),
 							ownerAvatarUrl: require('../images/wyz.jpg')
 						}
-						this.arr.push(obj)
-							for(var i=0;i<this.arr.length;i++){
-						if(this.arr[i-1]){
-							if(new Date(this.arr[i].ctime).getTime() - new Date(this.arr[i-1].ctime).getTime() < 10000){
-							console.log('尽力啊没有')
-							arrObj = {
-								direction: 2,
-								type: 2,
-								content: 'http://99.48.68.108:83/commerce-web/commerce/resource/getPicture/9cfb37a2c12040a9acbe5e5fb54572ae.jpg',
-								ownerAvatarUrl: require('../images/wyz.jpg'),
-								status:false,
-								error:false
-							}
-						}else{
-							console.log('jjjjjjjjjjjjjjjjjjj')
-							arrObj = {
-								direction: 2,
-								id: 1,
-								type: 2,
-								content: 'http://99.48.68.108:83/commerce-web/commerce/resource/getPicture/9cfb37a2c12040a9acbe5e5fb54572ae.jpg',
-								ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-								ownerAvatarUrl: require('../images/wyz.jpg'),
-								status:false,
-								error:false
-							}
-						}
-						}else{
-								arrObj = {
-								direction: 2,
-								type: 2,
-								content: 'http://99.48.68.108:83/commerce-web/commerce/resource/getPicture/9cfb37a2c12040a9acbe5e5fb54572ae.jpg',
-								ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-								ownerAvatarUrl: require('../images/wyz.jpg'),
-								status:false,
-								error:false
-							}
-						}
 
-					}
-						this.chatLists.push(arrObj)
+						this.chatLists.push(obj)
 					}
 					let resObj = {
 						content: obj.content,
 						fromUserId: 3,
 						toUserId: 1
 					}
-					console.log(resObj)
 					if (ws.readyState == ws.OPEN) {    
 	                //调用后台handleTextMessage方法    
 					this.str2ab(2,JSON.stringify(resObj));
@@ -559,7 +512,6 @@
 					}
 				}
 				let obj = {}
-				let arrObj = {}
 				var result = content;
 				for(var i = 0; i < list.length; i++) {
 					var img1 = result.split('static/img/');
@@ -576,58 +528,22 @@
 					fromUserId: 3,
 					toUserId: 1
 				}
-				 //调用后台handleTextMessage方法    
-				obj = {
+				if (ws.readyState == ws.OPEN) {    
+                //调用后台handleTextMessage方法    
+				this.str2ab(1,JSON.stringify(resObj));
+            } else {    
+				ws = new WebSocket(this.websocketurl + "/chat/binarySocketServer?userId=" + 3);
+            } 
+				
+					obj = {
 						direction: 2,
+						id: 1,
 						type: 1,
 						content: result,
-						ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+						ctime: new Date().toLocaleString(),
 						ownerAvatarUrl: require('../images/wyz.jpg')
 					}
-					this.arr.push(obj)
-					console.log(this.arr)
-					for(var i=0;i<this.arr.length;i++){
-						if(this.arr[i-1]){
-							if(new Date(this.arr[i].ctime).getTime() - new Date(this.arr[i-1].ctime).getTime() < 10000){
-							console.log('尽力啊没有')
-							arrObj = {
-								direction: 2,
-								id: 1,
-								type: 1,
-								content: result,
-								ownerAvatarUrl: require('../images/wyz.jpg'),
-								status:false,
-								error:false
-							}
-						}else{
-							console.log('jjjjjjjjjjjjjjjjjjj')
-							arrObj = {
-								direction: 2,
-								id: 1,
-								type: 1,
-								content: result,
-								ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-								ownerAvatarUrl: require('../images/wyz.jpg'),
-								status:false,
-								error:false
-							}
-						}
-						}else{
-								arrObj = {
-								direction: 2,
-								id: 1,
-								type: 1,
-								content: result,
-								ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-								ownerAvatarUrl: require('../images/wyz.jpg'),
-								status:false,
-								error:false
-							}
-						}
-
-					}
-					this.chatLists.push(arrObj)
-					console.log(this.chatLists)
+					this.chatLists.push(obj)
 					this.$nextTick(() => {
 						let msg = document.getElementById('content') // 获取对象
 						msg.scrollTop = msg.scrollHeight // 滚动高度
@@ -636,12 +552,6 @@
 					document.getElementById('inputs').innerHTML = ''
 					this.sendBtnShow = false
 					this.$refs.input.focus();
-			if (ws.readyState == ws.OPEN) {    
-               this.str2ab(1,JSON.stringify(resObj));
-            } else {    
-				ws = new WebSocket(this.websocketurl + "/chat/binarySocketServer?userId=" + 3);
-				console.log('失败')
-            } 
 			},
 			selectExpression(id) {
 				this.selectPicLists.push(require('../images/' + id + '.png'))
@@ -678,9 +588,6 @@
 	.chat {
 		width: 100%;
 		height: 100%;
-		.mint-spinner-snake{
-			border-width:2px;
-		}
 		/*padding: 2rem;*/
 		box-sizing: border-box;
 		.content {
@@ -792,17 +699,6 @@
 			}
 			.myself {
 				float: right;
-				.loadingStyle{
-					position: relative;
-				    overflow: hidden;
-				    vertical-align: middle;
-				    display:inline-block;
-				    .spinner{
-				    	float: left;
-					    vertical-align: middle;
-					    margin-top: 15px;
-				    }
-				}
 				.touxiang {
 					float: right;
 				}
