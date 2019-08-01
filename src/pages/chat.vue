@@ -13,10 +13,11 @@
 							</div>
 							<div class="myself" v-if="l.direction == 2">
 								<div class="loadingStyle">
-									<mt-spinner type="snake" :size="10" class="spinner" v-if="l.status"></mt-spinner>
+									<mt-spinner type="snake" :size="10" class="spinner" v-if="!l.status"></mt-spinner>
+									<img src="../images/error.jpg" v-if="l.error" style="width:1rem" />
 									<p v-html="$utils.toEmotion(l.content)"></p>
 								</div>
-								<img :src="l.ownerAvatarUrl" class="touxiang"/>
+								<img :src="l.ownerAvatarUrl" class="touxiang" />
 							</div>
 						</div>
 						<div v-if="l.type == 2">
@@ -27,7 +28,8 @@
 							<div class="myself" v-if="l.direction == 2">
 								<img :src="l.ownerAvatarUrl" class="touxiang" />
 								<div class="loadingStyle">
-									<mt-spinner type="snake" class="spinner" v-if="l.status"></mt-spinner>
+									<mt-spinner type="snake" class="spinner" v-if="!l.status"></mt-spinner>
+									<img src="../images/error.jpg" v-if="l.error" style="width:1rem" />
 									<img :src="l.content" style="width:100px;margin-right:2rem" @click="openImg">
 								</div>
 							</div>
@@ -74,14 +76,13 @@
 				</div>
 			</div>
 		</div>
-
 	</div>
 </template>
 
 <script>
 	import api from "../common/api.js";
 	import _utils from "../common/utils.js";
-	let ws 
+	let ws
 	export default {
 		name: 'chat',
 		data() {
@@ -102,42 +103,6 @@
 					active: false
 				}],
 				chatLists: [],
-				//				chatLists: [{
-				//						direction: 2,
-				//						type: 1,
-				//						content: '你好!![1]',
-				//						ctime: new Date().toLocaleString(),
-				//						ownerAvatarUrl: require('../images/wyz.jpg')
-				//					},
-				//					{
-				//						direction: 1,
-				//						type: 1,
-				//						content: '你也好。[3]',
-				//						ctime: new Date().toLocaleString(),
-				//						contactAvatarUrl: require('../images/touxiang.png')
-				//					},
-				//					{
-				//						direction: 2,
-				//						type: 1,
-				//						content: '这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像这是我的简历头像：',
-				//						ctime: new Date().toLocaleString(),
-				//						ownerAvatarUrl: require('../images/wyz.jpg')
-				//					},
-				//					{
-				//						direction: 2,
-				//						type: 2,
-				//						content: require('../images/wyz.jpg'),
-				//						ctime: new Date().toLocaleString(),
-				//						ownerAvatarUrl: require('../images/wyz.jpg')
-				//					},
-				//					{
-				//						direction: 1,
-				//						type: 1,
-				//						content: '你开心就好。[6]',
-				//						ctime: new Date().toLocaleString(),
-				//						contactAvatarUrl: require('../images/touxiang.png')
-				//					}
-				//				],
 				picLists: [{
 					src: require('../images/1.png'),
 					id: 1
@@ -342,10 +307,9 @@
 				}],
 				selectPicLists: [],
 				sendBtnShow: false,
-				//ws: {},
 				websocketurl: _utils.getWebsocketURL(),
 				obj: {},
-				arr:[]
+				arr: []
 			}
 		},
 		mounted() {
@@ -357,7 +321,7 @@
 				this.bigImgShow = true
 			},
 
-			str2ab(type,s) {
+			str2ab(type, s) {
 				console.log(s)
 				var b = new Blob([s], {
 					type: 'text/plain'
@@ -374,71 +338,96 @@
 				console.log('gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg')
 				ws.onmessage = (evnt) => {
 					let content = evnt.data;
-					console.log('contentcontentcontentcontentcontentcontentcontent' + content)
-					var reader = new FileReader();
-					let str = ''
-					let obj = {}
-					let arrObj = {}
-					reader.onload = function(evnt) {
-						str = reader.result; //内容就在这里
-						var f = JSON.parse(str.substring(1))
-						console.log(str)
-						obj = {
-							direction: 1,
-							type: str.substring(0,1),
-							content: f.content,
-							ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-							contactAvatarUrl: require('../images/wyz.jpg')
+					_this.onmessage = true
+					console.log('contentcontentcontentcontentcontentcontentcontent' + typeof(content))
+					if(typeof(content) == 'string') {
+						if(JSON.parse(content).status == 1) {
+							let length = _this.chatLists.length
+							_this.chatLists[length - 1].status = true
+						} else if(JSON.parse(content).status == 0) {
+							let length = _this.chatLists.length
+							_this.chatLists[length - 1].status = true
+							_this.chatLists[length - 1].error = true
 						}
-						_this.arr.push(obj)
-					for(var i=0;i<_this.arr.length;i++){
-						if(_this.arr[i-1]){
-							if(new Date(_this.arr[i].ctime).getTime() - new Date(_this.arr[i-1].ctime).getTime() < 10000){
-							console.log('尽力啊没有')
-							arrObj = {
+					} else {
+						var reader = new FileReader();
+						let str = ''
+						let obj = {}
+						let arrObj = {}
+						reader.onload = function(evnt) {
+							str = reader.result; //内容就在这里
+							var f = JSON.parse(str.substring(1))
+							console.log(str)
+							obj = {
 								direction: 1,
-								type: str.substring(0,1),
-								content: f.content,
-								contactAvatarUrl: require('../images/wyz.jpg')
-							}
-						}else{
-							console.log('jjjjjjjjjjjjjjjjjjj')
-							arrObj = {
-								direction: 1,
-								type: str.substring(0,1),
+								type: str.substring(0, 1),
 								content: f.content,
 								ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 								contactAvatarUrl: require('../images/wyz.jpg')
 							}
-						}
-						}else{
-								arrObj = {
-								direction: 1,
-								type: str.substring(0,1),
-								content:f.content,
-								ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-								contactAvatarUrl: require('../images/wyz.jpg')
+							_this.arr.push(obj)
+							for(var i = 0; i < _this.arr.length; i++) {
+								if(_this.arr[i - 1]) {
+									if(new Date(_this.arr[i].ctime).getTime() - new Date(_this.arr[i - 1].ctime).getTime() < 10000) {
+										console.log('尽力啊没有')
+										arrObj = {
+											direction: 1,
+											type: str.substring(0, 1),
+											content: f.content,
+											contactAvatarUrl: require('../images/wyz.jpg')
+										}
+									} else {
+										console.log('jjjjjjjjjjjjjjjjjjj')
+										arrObj = {
+											direction: 1,
+											type: str.substring(0, 1),
+											content: f.content,
+											ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+											contactAvatarUrl: require('../images/wyz.jpg')
+										}
+									}
+								} else {
+									arrObj = {
+										direction: 1,
+										type: str.substring(0, 1),
+										content: f.content,
+										ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+										contactAvatarUrl: require('../images/wyz.jpg')
+									}
+								}
 							}
-						}
+							_this.chatLists.push(arrObj)
+						};
+						reader.readAsText(content);
+						console.log(_this.chatLists)
 					}
-						_this.chatLists.push(arrObj)
-					};
-					reader.readAsText(content);
-					console.log(_this.chatLists)
-					_this.$nextTick(() => {
-						let msg = document.getElementById('content') // 获取对象
-						msg.scrollTop = msg.scrollHeight // 滚动高度
-					})
-					document.getElementById('inputs').innerHTML = ''
-					_this.sendBtnShow = false
-					_this.$refs.input.focus();
 				};
 				ws.onerror = function(evnt) {
 					Toast('网络异常，请重试！')
+					let length = _this.chatLists.length
+					if(!_this.chatLists[length - 1].status) {
+						setTimeout(function() {
+							console.log('定时器执行了没有')
+							if(!_this.chatLists[length - 1].status) {
+								_this.chatLists[length - 1].status = true
+								_this.chatLists[length - 1].error = true
+							}
+						}, 3000);
+					}
 				};
 				ws.onclose = function(evnt) {
 					console.log("session closed now");
 					ws = new WebSocket(_this.websocketurl + "/chat/binarySocketServer?userId=" + 1);
+					let length = _this.chatLists.length
+					if(!_this.chatLists[length - 1].status) {
+						setTimeout(function() {
+							console.log('定时器执行了没有')
+							if(!_this.chatLists[length - 1].status) {
+								_this.chatLists[length - 1].status = true
+								_this.chatLists[length - 1].error = true
+							}
+						}, 3000);
+					}
 				}
 			},
 			selectExpressionList(l, index) {
@@ -478,38 +467,44 @@
 							ownerAvatarUrl: require('../images/wyz.jpg')
 						}
 						this.arr.push(obj)
-							for(var i=0;i<this.arr.length;i++){
-						if(this.arr[i-1]){
-							if(new Date(this.arr[i].ctime).getTime() - new Date(this.arr[i-1].ctime).getTime() < 10000){
-							console.log('尽力啊没有')
-							arrObj = {
-								direction: 2,
-								type: 2,
-								content: 'http://99.48.68.108:83/commerce-web/commerce/resource/getPicture/9cfb37a2c12040a9acbe5e5fb54572ae.jpg',
-								ownerAvatarUrl: require('../images/wyz.jpg')
-							}
-						}else{
-							console.log('jjjjjjjjjjjjjjjjjjj')
-							arrObj = {
-								direction: 2,
-								id: 1,
-								type: 2,
-								content: 'http://99.48.68.108:83/commerce-web/commerce/resource/getPicture/9cfb37a2c12040a9acbe5e5fb54572ae.jpg',
-								ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-								ownerAvatarUrl: require('../images/wyz.jpg')
-							}
-						}
-						}else{
+						for(var i = 0; i < this.arr.length; i++) {
+							if(this.arr[i - 1]) {
+								if(new Date(this.arr[i].ctime).getTime() - new Date(this.arr[i - 1].ctime).getTime() < 10000) {
+									console.log('尽力啊没有')
+									arrObj = {
+										direction: 2,
+										type: 2,
+										content: 'http://99.48.68.108:83/commerce-web/commerce/resource/getPicture/9cfb37a2c12040a9acbe5e5fb54572ae.jpg',
+										ownerAvatarUrl: require('../images/wyz.jpg'),
+										status: false,
+										error: false
+									}
+								} else {
+									console.log('jjjjjjjjjjjjjjjjjjj')
+									arrObj = {
+										direction: 2,
+										id: 1,
+										type: 2,
+										content: 'http://99.48.68.108:83/commerce-web/commerce/resource/getPicture/9cfb37a2c12040a9acbe5e5fb54572ae.jpg',
+										ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+										ownerAvatarUrl: require('../images/wyz.jpg'),
+										status: false,
+										error: false
+									}
+								}
+							} else {
 								arrObj = {
-								direction: 2,
-								type: 2,
-								content: 'http://99.48.68.108:83/commerce-web/commerce/resource/getPicture/9cfb37a2c12040a9acbe5e5fb54572ae.jpg',
-								ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-								ownerAvatarUrl: require('../images/wyz.jpg')
+									direction: 2,
+									type: 2,
+									content: 'http://99.48.68.108:83/commerce-web/commerce/resource/getPicture/9cfb37a2c12040a9acbe5e5fb54572ae.jpg',
+									ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+									ownerAvatarUrl: require('../images/wyz.jpg'),
+									status: false,
+									error: false
+								}
 							}
-						}
 
-					}
+						}
 						this.chatLists.push(arrObj)
 					}
 					let resObj = {
@@ -518,12 +513,23 @@
 						toUserId: 3
 					}
 					console.log(resObj)
-					if (ws.readyState == ws.OPEN) {    
-	                //调用后台handleTextMessage方法    
-					this.str2ab(2,JSON.stringify(resObj));
-	            } else {    
-					ws = new WebSocket(this.websocketurl + "/chat/binarySocketServer?userId=" + 1);
-	            } 
+					let _this = this
+					let length = this.chatLists.length
+					if(!this.chatLists[length - 1].status) {
+						setTimeout(function() {
+							console.log(_this.chatLists[length - 1].status)
+							if(!_this.chatLists[length - 1].status) {
+								_this.chatLists[length - 1].status = true
+								_this.chatLists[length - 1].error = true
+							}
+						}, 3000);
+					}
+					if(ws.readyState == ws.OPEN) {
+						//调用后台handleTextMessage方法    
+						this.str2ab(2, JSON.stringify(resObj));
+					} else {
+						ws = new WebSocket(this.websocketurl + "/chat/binarySocketServer?userId=" + 1);
+					}
 				})
 			},
 			tirggerFile(event, file) {
@@ -601,30 +607,30 @@
 					fromUserId: 1,
 					toUserId: 3
 				}
-				if (ws.readyState == ws.OPEN) {    
-                //调用后台handleTextMessage方法    
-				this.str2ab(1,JSON.stringify(resObj));
+				//调用后台handleTextMessage方法    
 				obj = {
-						direction: 2,
-						type: 1,
-						content: result,
-						ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-						ownerAvatarUrl: require('../images/wyz.jpg')
-					}
-					this.arr.push(obj)
-					console.log(this.arr)
-					for(var i=0;i<this.arr.length;i++){
-						if(this.arr[i-1]){
-							if(new Date(this.arr[i].ctime).getTime() - new Date(this.arr[i-1].ctime).getTime() < 10000){
+					direction: 2,
+					type: 1,
+					content: result,
+					ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+					ownerAvatarUrl: require('../images/wyz.jpg')
+				}
+				this.arr.push(obj)
+				console.log(this.arr)
+				for(var i = 0; i < this.arr.length; i++) {
+					if(this.arr[i - 1]) {
+						if(new Date(this.arr[i].ctime).getTime() - new Date(this.arr[i - 1].ctime).getTime() < 10000) {
 							console.log('尽力啊没有')
 							arrObj = {
 								direction: 2,
 								id: 1,
 								type: 1,
 								content: result,
-								ownerAvatarUrl: require('../images/wyz.jpg')
+								ownerAvatarUrl: require('../images/wyz.jpg'),
+								status: false,
+								error: false
 							}
-						}else{
+						} else {
 							console.log('jjjjjjjjjjjjjjjjjjj')
 							arrObj = {
 								direction: 2,
@@ -632,35 +638,41 @@
 								type: 1,
 								content: result,
 								ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-								ownerAvatarUrl: require('../images/wyz.jpg')
+								ownerAvatarUrl: require('../images/wyz.jpg'),
+								status: false,
+								error: false
 							}
 						}
-						}else{
-								arrObj = {
-								direction: 2,
-								id: 1,
-								type: 1,
-								content: result,
-								ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-								ownerAvatarUrl: require('../images/wyz.jpg')
-							}
+					} else {
+						arrObj = {
+							direction: 2,
+							id: 1,
+							type: 1,
+							content: result,
+							ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+							ownerAvatarUrl: require('../images/wyz.jpg'),
+							status: false,
+							error: false
 						}
-
 					}
-					this.chatLists.push(arrObj)
-					console.log(this.chatLists)
-					this.$nextTick(() => {
-						let msg = document.getElementById('content') // 获取对象
-						msg.scrollTop = msg.scrollHeight // 滚动高度
-					})
-					console.log(this.toEmotion(result))
-					document.getElementById('inputs').innerHTML = ''
-					this.sendBtnShow = false
-					this.$refs.input.focus();
-            } else {    
-				ws = new WebSocket(this.websocketurl + "/chat/binarySocketServer?userId=" + 1);
-				console.log('失败')
-            } 
+
+				}
+				this.chatLists.push(arrObj)
+				console.log(this.chatLists)
+				this.$nextTick(() => {
+					let msg = document.getElementById('content') // 获取对象
+					msg.scrollTop = msg.scrollHeight // 滚动高度
+				})
+				console.log(this.toEmotion(result))
+				document.getElementById('inputs').innerHTML = ''
+				this.sendBtnShow = false
+				this.$refs.input.focus();
+				if(ws.readyState == ws.OPEN) {
+					this.str2ab(1, JSON.stringify(resObj));
+				} else {
+					ws = new WebSocket(this.websocketurl + "/chat/binarySocketServer?userId=" + 1);
+					console.log('失败')
+				}
 			},
 			selectExpression(id) {
 				this.selectPicLists.push(require('../images/' + id + '.png'))
@@ -683,13 +695,15 @@
 			openGallery() {
 				this.galleryShow = !this.galleryShow
 				this.expressionShow = false
-
 				if(this.galleryShow == false) {
 					this.$refs.input.focus();
 				} else {
 					this.$refs.input.blur();
 				}
 			}
+		},
+		beforeDestroy() {
+			ws.close()
 		}
 	}
 </script>
@@ -697,8 +711,8 @@
 	.chat {
 		width: 100%;
 		height: 100%;
-		.mint-spinner-snake{
-			border-width:2px;
+		.mint-spinner-snake {
+			border-width: 2px;
 		}
 		/*padding: 2rem;*/
 		box-sizing: border-box;
@@ -811,16 +825,16 @@
 			}
 			.myself {
 				float: right;
-				.loadingStyle{
+				.loadingStyle {
 					position: relative;
-				    overflow: hidden;
-				    vertical-align: middle;
-				    display:inline-block;
-				    .spinner{
-				    	float: left;
-					    vertical-align: middle;
-					    margin-top: 15px;
-				    }
+					overflow: hidden;
+					vertical-align: middle;
+					display: inline-block;
+					.spinner {
+						float: left;
+						vertical-align: middle;
+						margin-top: 15px;
+					}
 				}
 				.touxiang {
 					float: right;
