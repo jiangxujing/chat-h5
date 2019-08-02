@@ -309,18 +309,20 @@
 				sendBtnShow: false,
 				websocketurl: _utils.getWebsocketURL(),
 				obj: {},
-				arr: []
+				arr: [],
+				pageNo:0
 			}
 		},
 		mounted() {
-			let id = this.$route.query.id
+			this.id = this.$route.query.id
+			this.memberIdTo = this.$route.query.memberIdTo
 			this.init()
+			this.getListMemberChat()
 		},
 		methods: {
 			openImg() {
 				this.bigImgShow = true
 			},
-
 			str2ab(type, s) {
 				console.log(s)
 				var b = new Blob([s], {
@@ -332,9 +334,21 @@
 					ws.send(new Blob([type, s]));
 				}
 			},
+			getListMemberChat(){
+				let req = {
+					memberIdTo:this.memberIdTo,
+					pageNo:0,
+					pageSize:10
+				}
+				api.post(api.getUrl2('getListMemberChat'), req).then(res => {
+					if(res.code == '0000'){
+						
+					}
+				})
+			},
 			init() {
 				let _this = this
-				ws = new WebSocket(this.websocketurl + "/chat/binarySocketServer?userId=" + 1);
+				ws = new WebSocket(this.websocketurl + "/chat/binarySocketServer?userId=" + this.id);
 				console.log('gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg')
 				ws.onmessage = (evnt) => {
 					let content = evnt.data;
@@ -417,7 +431,7 @@
 				};
 				ws.onclose = function(evnt) {
 					console.log("session closed now");
-					ws = new WebSocket(_this.websocketurl + "/chat/binarySocketServer?userId=" + 1);
+					ws = new WebSocket(_this.websocketurl + "/chat/binarySocketServer?userId=" +  this.id);
 					let length = _this.chatLists.length
 					if(!_this.chatLists[length - 1].status) {
 						setTimeout(function() {
@@ -509,8 +523,8 @@
 					}
 					let resObj = {
 						content: obj.content,
-						fromUserId: 1,
-						toUserId: 3
+						fromUserId: this.id,
+						toUserId: this.memberIdTo
 					}
 					console.log(resObj)
 					let _this = this
@@ -525,10 +539,9 @@
 						}, 3000);
 					}
 					if(ws.readyState == ws.OPEN) {
-						//调用后台handleTextMessage方法    
 						this.str2ab(2, JSON.stringify(resObj));
 					} else {
-						ws = new WebSocket(this.websocketurl + "/chat/binarySocketServer?userId=" + 1);
+						ws = new WebSocket(this.websocketurl + "/chat/binarySocketServer?userId=" +  this.id);
 					}
 				})
 			},
@@ -604,8 +617,8 @@
 				console.log(result)
 				let resObj = {
 					content: result,
-					fromUserId: 1,
-					toUserId: 3
+					fromUserId: this.id,
+					toUserId: this.memberIdTo
 				}
 				//调用后台handleTextMessage方法    
 				obj = {
@@ -670,7 +683,7 @@
 				if(ws.readyState == ws.OPEN) {
 					this.str2ab(1, JSON.stringify(resObj));
 				} else {
-					ws = new WebSocket(this.websocketurl + "/chat/binarySocketServer?userId=" + 1);
+					ws = new WebSocket(this.websocketurl + "/chat/binarySocketServer?userId=" + this.id);
 					console.log('失败')
 				}
 			},

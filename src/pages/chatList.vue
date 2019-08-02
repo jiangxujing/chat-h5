@@ -2,7 +2,7 @@
 	<div class="chatList">
 		<div  style="overflow-y:scroll;">
 			<mt-loadmore :top-method="loadTop" :autoFill="false" :bottom-method="loadBottom" :bottom-all-loaded="allLoaded" ref="loadmore">
-			<div class="chat-main" v-for="(i,index) in chatLists" @click="openChat(i.id)" :key="index">
+			<div class="chat-main" v-for="(i,index) in chatLists" @click="openChat(i.id,i.memberIdTo)" :key="index">
 				<div style="flex:1">
 					<img :src="i.headIcon" class="touxiang" />
 					<div class="info">
@@ -64,8 +64,8 @@
 					}
 				})
 			},
-			openChat(id) {
-				this.$router.push("/chat?id=" + id)
+			openChat(id,memberIdTo) {
+				this.$router.push("/chat?id=" + id+'&memberIdTo='+memberIdTo)
 			}
 		},
 		mounted() {

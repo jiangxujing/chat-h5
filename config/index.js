@@ -16,8 +16,8 @@ module.exports = {
         secure: false,
         changeOrigin: false,
       }, 
-      '/play-web/**': {
-        target: 'http://99.48.68.82:8080', // 你接口的域名
+      '/chat/**': {
+        target: 'http://99.48.68.100:8092', // 你接口的域名
         secure: false,
         changeOrigin: false,
       }
