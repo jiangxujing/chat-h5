@@ -2,5 +2,6 @@
 	"productUpload": "/commerce/resource/productUpload",
 	"getListTopLevel": "/commerce/category/listTopLevel",
 	"getListChatSession":"/memberSession/listChatSession",
-	"getListMemberChat":"/memberChat/listMemberChat"
+	"getListMemberChat":"/memberChat/listMemberChat",
+	"upload":"/storage/upload"
   }

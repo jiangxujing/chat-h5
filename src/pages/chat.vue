@@ -4,11 +4,11 @@
 		<div class="content" id="content">
 			<mt-loadmore :top-method="loadTop" :bottom-method="loadBottom" :bottom-all-loaded="allLoaded" ref="loadmore">
 				<div v-for="(l,index) in chatLists" :key="index" style="margin-bottom:2rem" :class="(index == chatLists.length-1)?'active':''">
-					<div class="dateStyle">{{l.ctime}}</div>
+					<div class="dateStyle" v-text="$utils.formatTime(l.createTime)"></div>
 					<div class="chatStyle">
-						<div v-if="l.type == 1">
+						<div v-if="l.type == 0 || l.type == 1">
 							<div class="friend" v-if="l.direction == 1">
-								<img :src="l.contactAvatarUrl" class="touxiang" />
+								<img :src="l.headIcon" class="touxiang" />
 								<p v-html="$utils.toEmotion(l.content)"></p>
 							</div>
 							<div class="myself" v-if="l.direction == 2">
@@ -17,16 +17,16 @@
 									<img src="../images/error.jpg" v-if="l.error" style="width:1rem" />
 									<p v-html="$utils.toEmotion(l.content)"></p>
 								</div>
-								<img :src="l.ownerAvatarUrl" class="touxiang" />
+								<img :src="l.headIcon" class="touxiang" />
 							</div>
 						</div>
 						<div v-if="l.type == 2">
 							<div class="friend" v-if="l.direction == 1">
-								<img :src="l.contactAvatarUrl" class="touxiang" />
+								<img :src="l.headIcon" class="touxiang" />
 								<img :src="l.content" style="width:100px;margin-left:2rem" @click="openImg">
 							</div>
 							<div class="myself" v-if="l.direction == 2">
-								<img :src="l.ownerAvatarUrl" class="touxiang" />
+								<img :src="l.headIcon" class="touxiang" />
 								<div class="loadingStyle">
 									<mt-spinner type="snake" class="spinner" v-if="!l.status"></mt-spinner>
 									<img src="../images/error.jpg" v-if="l.error" style="width:1rem" />
@@ -82,9 +82,13 @@
 <script>
 	import api from "../common/api.js";
 	import _utils from "../common/utils.js";
+	 import ScrollLoader from '../pages/scrollLoader.vue';
 	let ws
 	export default {
 		name: 'chat',
+		 components: {
+            ScrollLoader
+        },
 		data() {
 			return {
 				bigImgShow: false,
@@ -337,12 +341,27 @@
 			getListMemberChat(){
 				let req = {
 					memberIdTo:this.memberIdTo,
-					pageNo:0,
+					pageNo:0 || this.pageNo,
 					pageSize:10
 				}
 				api.post(api.getUrl2('getListMemberChat'), req).then(res => {
+					let _this = this
 					if(res.code == '0000'){
-						
+						let arr = res.content;
+						arr.forEach(function(i) {
+			              _this.$set(i, 'status', true);
+			              if(i.direction == 1){
+			              	_this.contactAvatarUrl = i.headIcon
+			              }else if(i.direction == 2){
+			              	_this.ownerAvatarUrl = i.headIcon
+			              }
+			            });
+						 //this.chatLists = this.chatLists.concat(res.content)
+						 this.chatLists = res.content.reverse().concat( this.chatLists); //倒序合并
+					    if(res.content.length < 10) {
+				          Toast('没有更多了')
+				          return;
+				        }
 					}
 				})
 			},
@@ -376,19 +395,19 @@
 								direction: 1,
 								type: str.substring(0, 1),
 								content: f.content,
-								ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-								contactAvatarUrl: require('../images/wyz.jpg')
+								createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+								headIcon: require('../images/wyz.jpg')
 							}
 							_this.arr.push(obj)
 							for(var i = 0; i < _this.arr.length; i++) {
 								if(_this.arr[i - 1]) {
-									if(new Date(_this.arr[i].ctime).getTime() - new Date(_this.arr[i - 1].ctime).getTime() < 10000) {
+									if(new Date(_this.arr[i].createTime).getTime() - new Date(_this.arr[i - 1].createTime).getTime() < 10000) {
 										console.log('尽力啊没有')
 										arrObj = {
 											direction: 1,
 											type: str.substring(0, 1),
 											content: f.content,
-											contactAvatarUrl: require('../images/wyz.jpg')
+											headIcon: require('../images/wyz.jpg')
 										}
 									} else {
 										console.log('jjjjjjjjjjjjjjjjjjj')
@@ -396,8 +415,8 @@
 											direction: 1,
 											type: str.substring(0, 1),
 											content: f.content,
-											ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-											contactAvatarUrl: require('../images/wyz.jpg')
+											createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+											headIcon: require('../images/wyz.jpg')
 										}
 									}
 								} else {
@@ -405,8 +424,8 @@
 										direction: 1,
 										type: str.substring(0, 1),
 										content: f.content,
-										ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-										contactAvatarUrl: require('../images/wyz.jpg')
+										createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+										headIcon: require('../images/wyz.jpg')
 									}
 								}
 							}
@@ -417,7 +436,6 @@
 					}
 				};
 				ws.onerror = function(evnt) {
-					Toast('网络异常，请重试！')
 					let length = _this.chatLists.length
 					if(!_this.chatLists[length - 1].status) {
 						setTimeout(function() {
@@ -461,6 +479,8 @@
 				this.galleryShow = false
 			},
 			loadTop() {
+				this.pageNo++
+				this.getListMemberChat()
 				this.$refs.loadmore.onTopLoaded();
 			},
 			loadBottom() {
@@ -468,7 +488,7 @@
 				this.$refs.loadmore.onBottomLoaded();
 			},
 			sendPic() {
-				api.upload(api.getUrl('productUpload'), this.formData).then(res => {
+				api.upload(api.getUrl2('upload'), this.formData).then(res => {
 					let obj = {}
 					let arrObj = {}
 					if(res.code == '0000') {
@@ -477,19 +497,19 @@
 							direction: 2,
 							type: 2,
 							content: 'http://99.48.68.108:83/commerce-web/commerce/resource/getPicture/9cfb37a2c12040a9acbe5e5fb54572ae.jpg',
-							ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-							ownerAvatarUrl: require('../images/wyz.jpg')
+							createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+							headIcon: require('../images/wyz.jpg')
 						}
 						this.arr.push(obj)
 						for(var i = 0; i < this.arr.length; i++) {
 							if(this.arr[i - 1]) {
-								if(new Date(this.arr[i].ctime).getTime() - new Date(this.arr[i - 1].ctime).getTime() < 10000) {
+								if(new Date(this.arr[i].createTime).getTime() - new Date(this.arr[i - 1].createTime).getTime() < 10000) {
 									console.log('尽力啊没有')
 									arrObj = {
 										direction: 2,
 										type: 2,
 										content: 'http://99.48.68.108:83/commerce-web/commerce/resource/getPicture/9cfb37a2c12040a9acbe5e5fb54572ae.jpg',
-										ownerAvatarUrl: require('../images/wyz.jpg'),
+										headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 										status: false,
 										error: false
 									}
@@ -500,8 +520,8 @@
 										id: 1,
 										type: 2,
 										content: 'http://99.48.68.108:83/commerce-web/commerce/resource/getPicture/9cfb37a2c12040a9acbe5e5fb54572ae.jpg',
-										ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-										ownerAvatarUrl: require('../images/wyz.jpg'),
+										createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+										headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 										status: false,
 										error: false
 									}
@@ -511,8 +531,8 @@
 									direction: 2,
 									type: 2,
 									content: 'http://99.48.68.108:83/commerce-web/commerce/resource/getPicture/9cfb37a2c12040a9acbe5e5fb54572ae.jpg',
-									ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-									ownerAvatarUrl: require('../images/wyz.jpg'),
+									createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+									headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 									status: false,
 									error: false
 								}
@@ -542,6 +562,17 @@
 						this.str2ab(2, JSON.stringify(resObj));
 					} else {
 						ws = new WebSocket(this.websocketurl + "/chat/binarySocketServer?userId=" +  this.id);
+						let _this = this
+						let length = _this.chatLists.length
+						if(!_this.chatLists[length - 1].status) {
+						setTimeout(function() {
+							console.log('定时器执行了没有')
+							if(!_this.chatLists[length - 1].status) {
+								_this.chatLists[length - 1].status = true
+								_this.chatLists[length - 1].error = true
+							}
+						}, 3000);
+					}
 					}
 				})
 			},
@@ -614,32 +645,31 @@
 					}
 				}
 				this.result = result
-				console.log(result)
+				
 				let resObj = {
 					content: result,
 					fromUserId: this.id,
 					toUserId: this.memberIdTo
 				}
+				console.log(resObj)
 				//调用后台handleTextMessage方法    
 				obj = {
 					direction: 2,
 					type: 1,
 					content: result,
-					ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-					ownerAvatarUrl: require('../images/wyz.jpg')
+					createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss")
 				}
 				this.arr.push(obj)
 				console.log(this.arr)
 				for(var i = 0; i < this.arr.length; i++) {
 					if(this.arr[i - 1]) {
-						if(new Date(this.arr[i].ctime).getTime() - new Date(this.arr[i - 1].ctime).getTime() < 10000) {
+						if(new Date(this.arr[i].createTime).getTime() - new Date(this.arr[i - 1].createTime).getTime() < 10000) {
 							console.log('尽力啊没有')
 							arrObj = {
 								direction: 2,
-								id: 1,
 								type: 1,
 								content: result,
-								ownerAvatarUrl: require('../images/wyz.jpg'),
+								headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 								status: false,
 								error: false
 							}
@@ -647,11 +677,10 @@
 							console.log('jjjjjjjjjjjjjjjjjjj')
 							arrObj = {
 								direction: 2,
-								id: 1,
 								type: 1,
 								content: result,
-								ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-								ownerAvatarUrl: require('../images/wyz.jpg'),
+								createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+								headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 								status: false,
 								error: false
 							}
@@ -659,11 +688,10 @@
 					} else {
 						arrObj = {
 							direction: 2,
-							id: 1,
 							type: 1,
 							content: result,
-							ctime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-							ownerAvatarUrl: require('../images/wyz.jpg'),
+							createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+							headIcon: this.ownerAvatarUrl ||  require('../images/wyz.jpg'),
 							status: false,
 							error: false
 						}
@@ -685,6 +713,17 @@
 				} else {
 					ws = new WebSocket(this.websocketurl + "/chat/binarySocketServer?userId=" + this.id);
 					console.log('失败')
+					let _this = this
+					let length = _this.chatLists.length
+					if(!_this.chatLists[length - 1].status) {
+						setTimeout(function() {
+							console.log('定时器执行了没有')
+							if(!_this.chatLists[length - 1].status) {
+								_this.chatLists[length - 1].status = true
+								_this.chatLists[length - 1].error = true
+							}
+						}, 3000);
+					}
 				}
 			},
 			selectExpression(id) {

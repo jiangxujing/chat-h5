@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import chat from '@/pages/chat'
 import chatList from '@/pages/chatList'
-import friendChat from '@/pages/friendChat'
+import scrollLoader from '@/pages/scrollLoader'
 Vue.use(Router)
 
 export default new Router({
@@ -17,9 +17,9 @@ export default new Router({
       name: 'chatList',
       component: chatList
     },{
-    	  path: '/friendChat',
-      name: 'friendChat',
-      component: friendChat
+    	  path: '/scrollLoader',
+      name: 'scrollLoader',
+      component: scrollLoader
     }
   ]
 })
