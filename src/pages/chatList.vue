@@ -1,6 +1,6 @@
 <template>
 	<div class="chatList">
-		<div  style="overflow-y:scroll;">
+		<div  style="height:100%;overflow-y:scroll;">
 			<mt-loadmore :top-method="loadTop" :autoFill="false" :bottom-method="loadBottom" :bottom-all-loaded="allLoaded" ref="loadmore">
 			<div class="chat-main" v-for="(i,index) in chatLists" @click="openChat(i.id,i.memberIdTo)" :key="index">
 				<div style="flex:1">
@@ -54,7 +54,7 @@
 					pageNo:0 || this.pageNo,
 					pageSize: 10
 				}
-				api.post(api.getUrl2('getListChatSession'), req).then(res => {
+				api.post(api.getUrl('getListChatSession'), req).then(res => {
 					if(res.code == '0000'){
 						 this.chatLists = this.chatLists.concat(res.content)
 					    if(res.content.length < 10) {

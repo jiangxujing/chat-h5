@@ -10,12 +10,12 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-    	 '/commerce-web/**': {
-        //target: 'http://99.48.66.106:8083', // 你接口的域名sit
-        target: 'http://99.48.68.106:8083', // 你接口的域名uat
-        secure: false,
-        changeOrigin: false,
-      }, 
+//  	 '/commerce-web/**': {
+//      //target: 'http://99.48.66.106:8083', // 你接口的域名sit
+//      target: 'http://99.48.68.106:8083', // 你接口的域名uat
+//      secure: false,
+//      changeOrigin: false,
+//    }, 
       '/chat/**': {
         target: 'http://99.48.68.100:8092', // 你接口的域名
         secure: false,

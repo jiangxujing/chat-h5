@@ -30,8 +30,8 @@ function filterNull(o) {
     return o
 }
 
-const prefix = '/commerce-web'
-const prefix2 = '/chat'
+const prefix = '/chat'
+const prefix2 = '/commerce-web'
 
 const _parseJSON = str => {
     if (typeof str === 'object') {
@@ -125,7 +125,8 @@ const postExcel = (url, data) => {
 
 // 一般请求
 const post = (url, data) => {
-     let token = localStorage.getItem('token')
+    // let token = '0A159ECFDF148BBC6CF999929D8B2C24'
+    let token = localStorage.getItem('token')
     const sec = 6000
     let postData = {}
 

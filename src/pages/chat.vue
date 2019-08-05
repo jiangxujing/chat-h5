@@ -1,8 +1,10 @@
 <template>
 	<div class="chat" id="chat">
-
-		<div class="content" id="content">
-			<mt-loadmore :top-method="loadTop" :bottom-method="loadBottom" :bottom-all-loaded="allLoaded" ref="loadmore">
+		<div class="content" id="content" @touchmove="touchmove()">
+			<!--<mt-loadmore :top-method="loadTop" :bottom-all-loaded="allLoaded" ref="loadmore">-->
+				<div v-show="loadingShow" style="text-align: center;">
+					<img src="../images/loading.png" style="width:2rem;"/>
+				</div>
 				<div v-for="(l,index) in chatLists" :key="index" style="margin-bottom:2rem" :class="(index == chatLists.length-1)?'active':''">
 					<div class="dateStyle" v-text="$utils.formatTime(l.createTime)"></div>
 					<div class="chatStyle">
@@ -40,7 +42,7 @@
 					</div>
 				</div>
 				<div style="width:100%;height:100px" v-if="expressionShow || galleryShow"></div>
-			</mt-loadmore>
+			<!--</mt-loadmore>-->
 		</div>
 		<div class="tips">
 			<div style="margin-bottom:2rem;margin-left:2rem">
@@ -82,13 +84,10 @@
 <script>
 	import api from "../common/api.js";
 	import _utils from "../common/utils.js";
-	 import ScrollLoader from '../pages/scrollLoader.vue';
+	import { Toast, MessageBox, Swipe, SwipeItem } from 'mint-ui'
 	let ws
 	export default {
 		name: 'chat',
-		 components: {
-            ScrollLoader
-        },
 		data() {
 			return {
 				bigImgShow: false,
@@ -314,7 +313,8 @@
 				websocketurl: _utils.getWebsocketURL(),
 				obj: {},
 				arr: [],
-				pageNo:0
+				pageNo: 0,
+				loadingShow:false
 			}
 		},
 		mounted() {
@@ -328,40 +328,70 @@
 				this.bigImgShow = true
 			},
 			str2ab(type, s) {
-				console.log(s)
 				var b = new Blob([s], {
 					type: 'text/plain'
 				});
 				var r = new FileReader();
 				r.readAsArrayBuffer(b);
 				r.onload = function() {
+					console.log(type)
+					console.log(s)
 					ws.send(new Blob([type, s]));
 				}
 			},
-			getListMemberChat(){
+			touchmove() { // 如果手指有移动，则取消所有事件，此时说明用户只是要移动而不是长按
+				let _this = this
+				this.$nextTick(function() {
+					console.log('hhhhhhhhhhhhhhhhhhhh')
+					let msg = document.getElementById('content') // 获取对象
+					console.log(msg.scrollTop)
+					if(msg.scrollTop < 100) {
+						if(_this.move){
+							_this.loadingShow = true
+							console.log('男男女女女女女女女女女女女女')
+							_this.pageNo++
+							_this.getListMemberChat()
+							_this.move = false
+						}
+					}
+				})
+			},
+			getListMemberChat() {
 				let req = {
-					memberIdTo:this.memberIdTo,
-					pageNo:0 || this.pageNo,
-					pageSize:10
+					memberIdTo: this.memberIdTo,
+					pageNo: 0 || this.pageNo,
+					pageSize: 10
 				}
-				api.post(api.getUrl2('getListMemberChat'), req).then(res => {
+				api.post(api.getUrl('getListMemberChat'), req).then(res => {
 					let _this = this
-					if(res.code == '0000'){
+					if(res.code == '0000') {
 						let arr = res.content;
 						arr.forEach(function(i) {
-			              _this.$set(i, 'status', true);
-			              if(i.direction == 1){
-			              	_this.contactAvatarUrl = i.headIcon
-			              }else if(i.direction == 2){
-			              	_this.ownerAvatarUrl = i.headIcon
-			              }
-			            });
-						 //this.chatLists = this.chatLists.concat(res.content)
-						 this.chatLists = res.content.reverse().concat( this.chatLists); //倒序合并
-					    if(res.content.length < 10) {
-				          Toast('没有更多了')
-				          return;
-				        }
+							_this.$set(i, 'status', true);
+							if(i.direction == 1) {
+								_this.contactAvatarUrl = i.headIcon
+							} else if(i.direction == 2) {
+								_this.ownerAvatarUrl = i.headIcon
+							}
+						});
+						this.chatLists = res.content.reverse().concat(this.chatLists); //倒序合并
+						this.loadingShow = false
+						this.move = true
+						if(res.content.length < 10) {
+							Toast('没有更多了')
+							return;
+						}
+						this.$nextTick(function() {
+							console.log('hhhhhhhhhhhhhhhhhhhh')
+							let msg = document.getElementById('content') // 获取对象
+							let innerHeight = document.querySelector('.content').clientHeight
+							// 变量scrollTop是滚动条滚动时，距离顶部的距离
+							let scrollTop = document.documentElement.scrollTop || window.pageYOffset || document.body.scrollTop
+							// 变量scrollHeight是滚动条的总高度
+							let scrollHeight = document.documentElement.clientHeight || document.body.scrollHeight
+							//msg.scrollTop = innerHeight + scrollHeight + scrollTop+500
+							msg.scrollTop = innerHeight + scrollTop + scrollHeight - 100
+						})
 					}
 				})
 			},
@@ -402,7 +432,6 @@
 							for(var i = 0; i < _this.arr.length; i++) {
 								if(_this.arr[i - 1]) {
 									if(new Date(_this.arr[i].createTime).getTime() - new Date(_this.arr[i - 1].createTime).getTime() < 10000) {
-										console.log('尽力啊没有')
 										arrObj = {
 											direction: 1,
 											type: str.substring(0, 1),
@@ -410,7 +439,6 @@
 											headIcon: require('../images/wyz.jpg')
 										}
 									} else {
-										console.log('jjjjjjjjjjjjjjjjjjj')
 										arrObj = {
 											direction: 1,
 											type: str.substring(0, 1),
@@ -439,7 +467,6 @@
 					let length = _this.chatLists.length
 					if(!_this.chatLists[length - 1].status) {
 						setTimeout(function() {
-							console.log('定时器执行了没有')
 							if(!_this.chatLists[length - 1].status) {
 								_this.chatLists[length - 1].status = true
 								_this.chatLists[length - 1].error = true
@@ -449,11 +476,10 @@
 				};
 				ws.onclose = function(evnt) {
 					console.log("session closed now");
-					ws = new WebSocket(_this.websocketurl + "/chat/binarySocketServer?userId=" +  this.id);
+					_this.init()
 					let length = _this.chatLists.length
 					if(!_this.chatLists[length - 1].status) {
 						setTimeout(function() {
-							console.log('定时器执行了没有')
 							if(!_this.chatLists[length - 1].status) {
 								_this.chatLists[length - 1].status = true
 								_this.chatLists[length - 1].error = true
@@ -478,17 +504,13 @@
 				this.expressionShow = false;
 				this.galleryShow = false
 			},
-			loadTop() {
-				this.pageNo++
-				this.getListMemberChat()
-				this.$refs.loadmore.onTopLoaded();
-			},
-			loadBottom() {
-				this.allLoaded = true; // if all data are loaded
-				this.$refs.loadmore.onBottomLoaded();
-			},
+//			loadTop() {
+//				this.pageNo++
+//					this.getListMemberChat()
+//				this.$refs.loadmore.onTopLoaded();
+//			},
 			sendPic() {
-				api.upload(api.getUrl2('upload'), this.formData).then(res => {
+				api.upload(api.getUrl('upload'), this.formData).then(res => {
 					let obj = {}
 					let arrObj = {}
 					if(res.code == '0000') {
@@ -496,7 +518,7 @@
 						obj = {
 							direction: 2,
 							type: 2,
-							content: 'http://99.48.68.108:83/commerce-web/commerce/resource/getPicture/9cfb37a2c12040a9acbe5e5fb54572ae.jpg',
+							content: res.content,
 							createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 							headIcon: require('../images/wyz.jpg')
 						}
@@ -508,18 +530,17 @@
 									arrObj = {
 										direction: 2,
 										type: 2,
-										content: 'http://99.48.68.108:83/commerce-web/commerce/resource/getPicture/9cfb37a2c12040a9acbe5e5fb54572ae.jpg',
+										content: res.content,
 										headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 										status: false,
 										error: false
 									}
 								} else {
-									console.log('jjjjjjjjjjjjjjjjjjj')
 									arrObj = {
 										direction: 2,
 										id: 1,
 										type: 2,
-										content: 'http://99.48.68.108:83/commerce-web/commerce/resource/getPicture/9cfb37a2c12040a9acbe5e5fb54572ae.jpg',
+										content: res.content,
 										createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 										headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 										status: false,
@@ -530,7 +551,7 @@
 								arrObj = {
 									direction: 2,
 									type: 2,
-									content: 'http://99.48.68.108:83/commerce-web/commerce/resource/getPicture/9cfb37a2c12040a9acbe5e5fb54572ae.jpg',
+									content: res.content,
 									createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 									headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 									status: false,
@@ -561,18 +582,18 @@
 					if(ws.readyState == ws.OPEN) {
 						this.str2ab(2, JSON.stringify(resObj));
 					} else {
-						ws = new WebSocket(this.websocketurl + "/chat/binarySocketServer?userId=" +  this.id);
+						this.init()
 						let _this = this
 						let length = _this.chatLists.length
 						if(!_this.chatLists[length - 1].status) {
-						setTimeout(function() {
-							console.log('定时器执行了没有')
-							if(!_this.chatLists[length - 1].status) {
-								_this.chatLists[length - 1].status = true
-								_this.chatLists[length - 1].error = true
-							}
-						}, 3000);
-					}
+							setTimeout(function() {
+								console.log('定时器执行了没有')
+								if(!_this.chatLists[length - 1].status) {
+									_this.chatLists[length - 1].status = true
+									_this.chatLists[length - 1].error = true
+								}
+							}, 3000);
+						}
 					}
 				})
 			},
@@ -645,7 +666,7 @@
 					}
 				}
 				this.result = result
-				
+
 				let resObj = {
 					content: result,
 					fromUserId: this.id,
@@ -664,7 +685,6 @@
 				for(var i = 0; i < this.arr.length; i++) {
 					if(this.arr[i - 1]) {
 						if(new Date(this.arr[i].createTime).getTime() - new Date(this.arr[i - 1].createTime).getTime() < 10000) {
-							console.log('尽力啊没有')
 							arrObj = {
 								direction: 2,
 								type: 1,
@@ -674,7 +694,6 @@
 								error: false
 							}
 						} else {
-							console.log('jjjjjjjjjjjjjjjjjjj')
 							arrObj = {
 								direction: 2,
 								type: 1,
@@ -691,7 +710,7 @@
 							type: 1,
 							content: result,
 							createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-							headIcon: this.ownerAvatarUrl ||  require('../images/wyz.jpg'),
+							headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 							status: false,
 							error: false
 						}
@@ -711,13 +730,12 @@
 				if(ws.readyState == ws.OPEN) {
 					this.str2ab(1, JSON.stringify(resObj));
 				} else {
-					ws = new WebSocket(this.websocketurl + "/chat/binarySocketServer?userId=" + this.id);
+					this.init()
 					console.log('失败')
 					let _this = this
 					let length = _this.chatLists.length
 					if(!_this.chatLists[length - 1].status) {
 						setTimeout(function() {
-							console.log('定时器执行了没有')
 							if(!_this.chatLists[length - 1].status) {
 								_this.chatLists[length - 1].status = true
 								_this.chatLists[length - 1].error = true
@@ -752,7 +770,7 @@
 				} else {
 					this.$refs.input.blur();
 				}
-			}
+			},
 		},
 		beforeDestroy() {
 			ws.close()
@@ -769,7 +787,8 @@
 		/*padding: 2rem;*/
 		box-sizing: border-box;
 		.content {
-			height: calc(100% - 100px);
+			height: 90%;
+			/*height:calc(100%-100px);*/
 			overflow-y: scroll;
 			padding: 2rem;
 		}
@@ -857,7 +876,7 @@
 				}
 				p {
 					display: inline-block;
-					padding: 1.5rem;
+					padding: 1.2rem;
 					font-size: 1.3rem;
 					max-width: 70%;
 					line-height: 1.9rem;
