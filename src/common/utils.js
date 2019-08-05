@@ -753,9 +753,9 @@ export const getWebsocketURL = () =>{
  	if(hostname == 'localhost:8080'){
   	websocketurl = 'ws://99.48.68.109:8092'
   }else if(hostname == '99.48.68.95'){
-  	websocketurl = 'ws://99.48.68.109:8092'
+  	websocketurl = 'ws://99.48.68.100:8092'
   }else if(hostname == '99.48.68.109:92'){
-    websocketurl = 'ws://99.48.68.109:8092'
+    websocketurl = 'ws://99.48.68.100:8092'
   }else{
   	 websocketurl = 'wss://customer.lovehaimi.com'
   }

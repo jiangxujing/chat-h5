@@ -2,50 +2,51 @@
 	<div class="chat" id="chat">
 		<div class="content" id="content" @touchmove="touchmove()">
 			<!--<mt-loadmore :top-method="loadTop" :bottom-all-loaded="allLoaded" ref="loadmore">-->
-				<div v-show="loadingShow" style="text-align: center;">
-					<img src="../images/loading.png" style="width:2rem;"/>
-				</div>
-				<div v-for="(l,index) in chatLists" :key="index" style="margin-bottom:2rem" :class="(index == chatLists.length-1)?'active':''">
-					<div class="dateStyle" v-text="$utils.formatTime(l.createTime)"></div>
-					<div class="chatStyle">
-						<div v-if="l.type == 0 || l.type == 1">
-							<div class="friend" v-if="l.direction == 1">
-								<img :src="l.headIcon" class="touxiang" />
+			<div v-show="loadingShow" style="text-align: center;">
+				<img src="../images/loading.png" style="width:2rem;" />
+			</div>
+			<div v-for="(l,index) in chatLists" :key="index" style="margin-bottom:2rem" :class="(index == chatLists.length-1)?'active':''">
+				<div class="dateStyle" v-text="$utils.formatTime(l.createTime)" v-show="l.timer"></div>
+				<div class="chatStyle">
+					<div v-if="l.type == 0 || l.type == 1">
+						<div class="friend" v-if="l.direction == 1">
+							<img :src="l.headIcon" class="touxiang" />
+							<p v-html="$utils.toEmotion(l.content)"></p>
+						</div>
+						<div class="myself" v-if="l.direction == 2">
+							<div class="loadingStyle">
+								<mt-spinner type="snake" :size="10" class="spinner" v-if="!l.status"></mt-spinner>
+								<img src="../images/error.jpg" v-if="l.error" style="width:1rem" />
 								<p v-html="$utils.toEmotion(l.content)"></p>
 							</div>
-							<div class="myself" v-if="l.direction == 2">
-								<div class="loadingStyle">
-									<mt-spinner type="snake" :size="10" class="spinner" v-if="!l.status"></mt-spinner>
-									<img src="../images/error.jpg" v-if="l.error" style="width:1rem" />
-									<p v-html="$utils.toEmotion(l.content)"></p>
-								</div>
-								<img :src="l.headIcon" class="touxiang" />
+							<img :src="l.headIcon" class="touxiang" />
+						</div>
+					</div>
+					<div v-if="l.type == 2">
+						<div class="friend" v-if="l.direction == 1">
+							<img :src="l.headIcon" class="touxiang" />
+							<img :src="l.content" style="width:100px;margin-left:2rem" @click="openImg">
+						</div>
+						<div class="myself" v-if="l.direction == 2">
+							<img :src="l.headIcon" class="touxiang" />
+							<div class="loadingStyle">
+								<mt-spinner type="snake" class="spinner" v-if="!l.status"></mt-spinner>
+								<img src="../images/error.jpg" v-if="l.error" style="width:1rem" />
+								<img :src="l.content" style="width:100px;margin-right:2rem" @click="openImg">
 							</div>
 						</div>
-						<div v-if="l.type == 2">
-							<div class="friend" v-if="l.direction == 1">
-								<img :src="l.headIcon" class="touxiang" />
-								<img :src="l.content" style="width:100px;margin-left:2rem" @click="openImg">
-							</div>
-							<div class="myself" v-if="l.direction == 2">
-								<img :src="l.headIcon" class="touxiang" />
-								<div class="loadingStyle">
-									<mt-spinner type="snake" class="spinner" v-if="!l.status"></mt-spinner>
-									<img src="../images/error.jpg" v-if="l.error" style="width:1rem" />
-									<img :src="l.content" style="width:100px;margin-right:2rem" @click="openImg">
-								</div>
-							</div>
-							<div class="bigImg" v-show="bigImgShow" @click="bigImgShow=false">
-								<img :src="l.content" />
-							</div>
+						<div class="bigImg" v-show="bigImgShow" @click="bigImgShow=false">
+							<img :src="l.content" />
 						</div>
 					</div>
 				</div>
-				<div style="width:100%;height:100px" v-if="expressionShow || galleryShow"></div>
+			</div>
+			<div style="width:100%;height:100px" v-if="expressionShow || galleryShow"></div>
 			<!--</mt-loadmore>-->
 		</div>
 		<div class="tips">
 			<div style="margin-bottom:2rem;margin-left:2rem">
+				<img src="../images/audio.png" style="width:3rem;vertical-align: middle;" id="messageBtn" />
 				<div class="inputBtn">
 					<div contenteditable="true" class="tipsInput" @input="changeText" id="inputs" @focus="focusfns" ref="input">
 						<img :src='item' v-for="item in selectPicLists" style="width:20px;margin-right:5px;vertical-align: middle;" />
@@ -61,11 +62,6 @@
 				</div>
 				<div style="margin-top:4rem"><img v-if="defaultShow" v-for="(i,index) in picLists" :key="index" :src="i.src" class="expressionImg" @click="selectExpression(i.id)" /></div>
 				<div v-if="!defaultShow" class="tuijian">无</div>
-				<!--<mt-swipe :auto="0" :show-indicators="false">
-					<mt-swipe-item v-for="(l,index) in picLists" :key="index">
-							<img v-for="(i,index) in l.pic" :key="index" :src="i.src" class="expressionImg" @click="selectExpression(i.id)"/>
-					</mt-swipe-item>
-				</mt-swipe>-->
 			</div>
 			<div class="galleryWrapper" v-if="galleryShow">
 				<div>
@@ -314,7 +310,10 @@
 				obj: {},
 				arr: [],
 				pageNo: 0,
-				loadingShow:false
+				loadingShow: false,
+				chatRecord: [],
+				recodeList: [],
+				prefix: 'http://99.48.68.100:8092/chat/storage/display/'
 			}
 		},
 		mounted() {
@@ -322,8 +321,59 @@
 			this.memberIdTo = this.$route.query.memberIdTo
 			this.init()
 			this.getListMemberChat()
+			this.initEvent()
 		},
 		methods: {
+			initEvent() {
+				let _this = this
+				var btnElem = document.getElementById("messageBtn"); //获取ID
+				var posStart = 0; //初始化起点坐标
+				var posEnd = 0; //初始化终点坐标
+				var posMove = 0; //初始化滑动坐标
+				console.log(screen);
+				btnElem.addEventListener("touchstart", function(event) {
+					event.preventDefault(); //阻止浏览器默认行为
+					posStart = 0;
+					posStart = event.touches[0].pageY; //获取起点坐标
+					btnElem.value = '松开 结束';
+					console.log("start");
+					console.log(posStart + '---------开始坐标');
+				});
+				btnElem.addEventListener("touchmove", function(event) {
+					event.preventDefault(); //阻止浏览器默认行为
+					posMove = 0;
+					posMove = event.targetTouches[0].pageY; //获取滑动实时坐标
+					if(posStart - posMove < 500) {
+						btnElem.value = '松开 结束';
+					} else {
+						btnElem.value = '松开手指，取消发送';
+					}
+					/*console.log(posStart+'---------');
+					console.log(posMove+'+++++++++');*/
+				});
+				btnElem.addEventListener("touchend", function(event) {
+					event.preventDefault();
+					posEnd = 0;
+					posEnd = event.changedTouches[0].pageY; //获取终点坐标
+					btnElem.value = '按住 说话';
+					console.log("End");
+					console.log(posEnd + '---------结束坐标');
+					if(posStart - posEnd < 500) {
+						console.log("发送成功");
+						_this.save();
+					} else {
+						console.log("取消发送");
+						console.log("Cancel");
+					};
+				});
+			},
+			save() {
+				   var formData = new FormData();
+                formData.append("file",file); //传给后台
+				api.upload(api.getUrl('upload'), formData).then(res => {
+					
+				})
+			},
 			openImg() {
 				this.bigImgShow = true
 			},
@@ -346,11 +396,11 @@
 					let msg = document.getElementById('content') // 获取对象
 					console.log(msg.scrollTop)
 					if(msg.scrollTop < 100) {
-						if(_this.move){
+						if(_this.move) {
 							_this.loadingShow = true
 							console.log('男男女女女女女女女女女女女女')
 							_this.pageNo++
-							_this.getListMemberChat()
+								_this.getListMemberChat()
 							_this.move = false
 						}
 					}
@@ -364,17 +414,27 @@
 				}
 				api.post(api.getUrl('getListMemberChat'), req).then(res => {
 					let _this = this
+					
 					if(res.code == '0000') {
-						let arr = res.content;
+						let arr = res.content.reverse();
 						arr.forEach(function(i) {
-							_this.$set(i, 'status', true);
-							if(i.direction == 1) {
-								_this.contactAvatarUrl = i.headIcon
-							} else if(i.direction == 2) {
-								_this.ownerAvatarUrl = i.headIcon
+			              _this.$set(i, 'status', true);
+			              _this.$set(i, 'timer', true);
+			            });
+			            for(var n =0;n<arr.length;n++){
+			            	if(arr[n - 1]) {
+								if(new Date(arr[n].createTime).getTime() - new Date(arr[n - 1].createTime).getTime() < 10000) {
+									arr[n].timer = false
+								} else {
+									arr[n].timer = true
+								}
+							} else {
+								arr[n].timer = true
 							}
-						});
-						this.chatLists = res.content.reverse().concat(this.chatLists); //倒序合并
+						}
+			            console.log(arr)
+//						this.chatLists = this.recodeList.concat(this.chatLists); //倒序合并
+						this.chatLists =  res.content.concat( this.chatLists);;
 						this.loadingShow = false
 						this.move = true
 						if(res.content.length < 10) {
@@ -419,6 +479,7 @@
 						let arrObj = {}
 						reader.onload = function(evnt) {
 							str = reader.result; //内容就在这里
+							console.log('sssssssssssssssssssssssssssssss' + str)
 							var f = JSON.parse(str.substring(1))
 							console.log(str)
 							obj = {
@@ -436,7 +497,8 @@
 											direction: 1,
 											type: str.substring(0, 1),
 											content: f.content,
-											headIcon: require('../images/wyz.jpg')
+											headIcon: require('../images/wyz.jpg'),
+											timer:false
 										}
 									} else {
 										arrObj = {
@@ -444,7 +506,8 @@
 											type: str.substring(0, 1),
 											content: f.content,
 											createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-											headIcon: require('../images/wyz.jpg')
+											headIcon: require('../images/wyz.jpg'),
+											timer:true
 										}
 									}
 								} else {
@@ -453,7 +516,8 @@
 										type: str.substring(0, 1),
 										content: f.content,
 										createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-										headIcon: require('../images/wyz.jpg')
+										headIcon: require('../images/wyz.jpg'),
+										timer:true
 									}
 								}
 							}
@@ -504,11 +568,11 @@
 				this.expressionShow = false;
 				this.galleryShow = false
 			},
-//			loadTop() {
-//				this.pageNo++
-//					this.getListMemberChat()
-//				this.$refs.loadmore.onTopLoaded();
-//			},
+			//			loadTop() {
+			//				this.pageNo++
+			//					this.getListMemberChat()
+			//				this.$refs.loadmore.onTopLoaded();
+			//			},
 			sendPic() {
 				api.upload(api.getUrl('upload'), this.formData).then(res => {
 					let obj = {}
@@ -533,18 +597,19 @@
 										content: res.content,
 										headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 										status: false,
-										error: false
+										error: false,
+										timer:false
 									}
 								} else {
 									arrObj = {
 										direction: 2,
-										id: 1,
 										type: 2,
 										content: res.content,
 										createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 										headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 										status: false,
-										error: false
+										error: false,
+										timer:true
 									}
 								}
 							} else {
@@ -555,7 +620,8 @@
 									createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 									headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 									status: false,
-									error: false
+									error: false,
+									timer:true
 								}
 							}
 
@@ -563,9 +629,11 @@
 						this.chatLists.push(arrObj)
 					}
 					let resObj = {
-						content: obj.content,
+						content: this.prefix + obj.content,
 						fromUserId: this.id,
-						toUserId: this.memberIdTo
+						toUserId: this.memberIdTo,
+						type: 2
+
 					}
 					console.log(resObj)
 					let _this = this
@@ -670,7 +738,8 @@
 				let resObj = {
 					content: result,
 					fromUserId: this.id,
-					toUserId: this.memberIdTo
+					toUserId: this.memberIdTo,
+					type: 1
 				}
 				console.log(resObj)
 				//调用后台handleTextMessage方法    
@@ -691,7 +760,8 @@
 								content: result,
 								headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 								status: false,
-								error: false
+								error: false,
+								timer:false
 							}
 						} else {
 							arrObj = {
@@ -701,7 +771,8 @@
 								createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 								headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 								status: false,
-								error: false
+								error: false,
+								timer:true
 							}
 						}
 					} else {
@@ -712,7 +783,8 @@
 							createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 							headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 							status: false,
-							error: false
+							error: false,
+							timer:true
 						}
 					}
 
@@ -935,7 +1007,7 @@
 			.inputBtn {
 				position: relative;
 				display: inline-block;
-				width: 70%;
+				width: 60%;
 				margin-top: 5px;
 				vertical-align: middle;
 				.tipsInput {
