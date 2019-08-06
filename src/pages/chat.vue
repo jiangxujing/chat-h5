@@ -16,7 +16,7 @@
 						<div class="myself" v-if="l.direction == 2">
 							<div class="loadingStyle">
 								<mt-spinner type="snake" :size="10" class="spinner" v-if="!l.status"></mt-spinner>
-								<img src="../images/error.jpg" v-if="l.error" style="width:1rem" />
+								<img src="../images/error.png" v-if="l.error" style="width:1.6rem" />
 								<p v-html="$utils.toEmotion(l.content)"></p>
 							</div>
 							<img :src="l.headIcon" class="touxiang" />
@@ -25,14 +25,38 @@
 					<div v-if="l.type == 2">
 						<div class="friend" v-if="l.direction == 1">
 							<img :src="l.headIcon" class="touxiang" />
-							<img :src="l.content" style="width:100px;margin-left:2rem" @click="openImg">
+							<img :src="prefix+l.content" style="width:100px;margin-left:2rem" @click="openImg">
 						</div>
 						<div class="myself" v-if="l.direction == 2">
 							<img :src="l.headIcon" class="touxiang" />
 							<div class="loadingStyle">
-								<mt-spinner type="snake" class="spinner" v-if="!l.status"></mt-spinner>
-								<img src="../images/error.jpg" v-if="l.error" style="width:1rem" />
-								<img :src="l.content" style="width:100px;margin-right:2rem" @click="openImg">
+								<mt-spinner type="snake" :size="10" class="spinner" v-if="!l.status"></mt-spinner>
+								<img src="../images/error.png" v-if="l.error" style="width:1.6rem" />
+								<img :src="prefix+l.content" style="width:100px;margin-right:2rem" @click="openImg">
+							</div>
+						</div>
+						<div class="bigImg" v-show="bigImgShow" @click="bigImgShow=false">
+							<img :src="prefix+l.content" />
+						</div>
+					</div>
+					<div v-if="l.type == 3">
+						<div class="friend" v-if="l.direction == 1">
+							<img :src="l.headIcon" class="touxiang" />
+							<audio :src="prefix+audioUrl" controls="controls" class="content-audio" style="display: block;">语音</audio>
+						</div>
+						<div class="myself" v-if="l.direction == 2">
+							<img :src="l.headIcon" class="touxiang" />
+							<div class="loadingStyle">
+								<mt-spinner type="snake" :size="10" class="spinner" v-if="!l.status"></mt-spinner>
+								<img src="../images/error.png" v-if="l.error" style="width:1.6rem;float:left" />
+							<!--	<audio :src="prefix+audioUrl" controls class="content-audio"></audio>-->
+								<div class="audioStyle" @click="play">
+									<img src="../images/audio.png" style="width:2rem;vertical-align: middle;position: absolute; right: 2rem;top: 1rem;"/>
+									 <audio preload="auto" id="downloadRec"><source :src="audioUrl" type="audio/mpeg" ></audio>
+								</div>
+								<!--<audio controls>
+									  <source :src="audioUrl" type="audio/mpeg">
+								</audio>-->
 							</div>
 						</div>
 						<div class="bigImg" v-show="bigImgShow" @click="bigImgShow=false">
@@ -81,7 +105,11 @@
 	import api from "../common/api.js";
 	import _utils from "../common/utils.js";
 	import { Toast, MessageBox, Swipe, SwipeItem } from 'mint-ui'
+	import recording from '../common/recorder.js'
 	let ws
+	var posStart = 0; //初始化起点坐标
+	var posEnd = 0; //初始化终点坐标
+	var posMove = 0; //初始化滑动坐标
 	export default {
 		name: 'chat',
 		data() {
@@ -313,7 +341,8 @@
 				loadingShow: false,
 				chatRecord: [],
 				recodeList: [],
-				prefix: 'http://99.48.68.100:8092/chat/storage/display/'
+				prefix: 'http://99.48.68.109:8092/chat/storage/display/',
+				audioUrl: ''
 			}
 		},
 		mounted() {
@@ -324,13 +353,41 @@
 			this.initEvent()
 		},
 		methods: {
+			play(){
+				var audio = document.querySelector('audio');
+				  if (audio.paused) {
+			        // 开始播放当前点击的音频
+			        audio.play();
+			    } else {
+			        audio.pause();
+			    }
+			},
+			save() {
+				//ajax
+				this.clearTimer()
+				this.endTime = new Date().getTime()
+				if(this.recorder) {
+					this.recorder.stop()
+					// 重置说话时间
+					this.num = 60
+					this.time = '按住说话（' + this.num + '秒）'
+					// 获取语音二进制文件
+					let bold = this.recorder.getBlob()
+					// 将获取的二进制对象转为二进制文件流
+					let files = new File([bold], 'test.mp3', {
+						type: 'audio/mp3',
+						lastModified: Date.now()
+					})
+					let fd = new FormData()
+					fd.append('file', files)
+					//      fd.append('tenantId', 3) // 额外参数，可根据选择填写
+					// 这里是通过上传语音文件的接口，获取接口返回的路径作为语音路径
+					this.sendPic(fd, 3)
+				}
+			},
 			initEvent() {
 				let _this = this
 				var btnElem = document.getElementById("messageBtn"); //获取ID
-				var posStart = 0; //初始化起点坐标
-				var posEnd = 0; //初始化终点坐标
-				var posMove = 0; //初始化滑动坐标
-				console.log(screen);
 				btnElem.addEventListener("touchstart", function(event) {
 					event.preventDefault(); //阻止浏览器默认行为
 					posStart = 0;
@@ -338,6 +395,7 @@
 					btnElem.value = '松开 结束';
 					console.log("start");
 					console.log(posStart + '---------开始坐标');
+					_this.mouseStart()
 				});
 				btnElem.addEventListener("touchmove", function(event) {
 					event.preventDefault(); //阻止浏览器默认行为
@@ -367,12 +425,69 @@
 					};
 				});
 			},
-			save() {
-				   var formData = new FormData();
-                formData.append("file",file); //传给后台
-				api.upload(api.getUrl('upload'), formData).then(res => {
-					
+			// 清除定时器
+			clearTimer() {
+				if(this.interval) {
+					this.num = 60
+					clearInterval(this.interval)
+				}
+			},
+			// 长按说话
+			mouseStart() {
+				this.clearTimer()
+				this.startTime = new Date().getTime()
+				recording.get((rec) => {
+					// 当首次按下时，要获取浏览器的麦克风权限，所以这时要做一个判断处理
+					if(rec) {
+						// 首次按下，只调用一次
+						if(this.flag) {
+							this.mouseEnd()
+							this.flag = false
+						} else {
+							this.recorder = rec
+							this.interval = setInterval(() => {
+								if(this.num <= 0) {
+									this.recorder.stop()
+									this.num = 60
+									this.clearTimer()
+								} else {
+									this.num--
+										this.time = '松开结束（' + this.num + '秒）'
+									this.recorder.start()
+								}
+							}, 1000)
+						}
+					}
 				})
+			},
+			uploadFile(fd) {
+				api.upload(api.getUrl('upload'), fd).then(res => {
+					this.audioUrl = res.content
+
+				})
+			},
+			// 松开时上传语音
+			mouseEnd() {
+				this.clearTimer()
+				this.endTime = new Date().getTime()
+				if(this.recorder) {
+					this.recorder.stop()
+					// 重置说话时间
+					this.num = 60
+					this.time = '按住说话（' + this.num + '秒）'
+					// 获取语音二进制文件
+					let bold = this.recorder.getBlob()
+					// 将获取的二进制对象转为二进制文件流
+					let files = new File([bold], 'test.mp3', {
+						type: 'audio/mp3',
+						lastModified: Date.now()
+					})
+					let fd = new FormData()
+					fd.append('file', files)
+					//      fd.append('tenantId', 3) // 额外参数，可根据选择填写
+					// 这里是通过上传语音文件的接口，获取接口返回的路径作为语音路径
+					this.uploadFile(fd)
+				}
 			},
 			openImg() {
 				this.bigImgShow = true
@@ -414,15 +529,15 @@
 				}
 				api.post(api.getUrl('getListMemberChat'), req).then(res => {
 					let _this = this
-					
+
 					if(res.code == '0000') {
 						let arr = res.content.reverse();
 						arr.forEach(function(i) {
-			              _this.$set(i, 'status', true);
-			              _this.$set(i, 'timer', true);
-			            });
-			            for(var n =0;n<arr.length;n++){
-			            	if(arr[n - 1]) {
+							_this.$set(i, 'status', true);
+							_this.$set(i, 'timer', true);
+						});
+						for(var n = 0; n < arr.length; n++) {
+							if(arr[n - 1]) {
 								if(new Date(arr[n].createTime).getTime() - new Date(arr[n - 1].createTime).getTime() < 10000) {
 									arr[n].timer = false
 								} else {
@@ -432,9 +547,9 @@
 								arr[n].timer = true
 							}
 						}
-			            console.log(arr)
-//						this.chatLists = this.recodeList.concat(this.chatLists); //倒序合并
-						this.chatLists =  res.content.concat( this.chatLists);;
+						console.log(arr)
+						//						this.chatLists = this.recodeList.concat(this.chatLists); //倒序合并
+						this.chatLists = res.content.concat(this.chatLists);;
 						this.loadingShow = false
 						this.move = true
 						if(res.content.length < 10) {
@@ -498,7 +613,7 @@
 											type: str.substring(0, 1),
 											content: f.content,
 											headIcon: require('../images/wyz.jpg'),
-											timer:false
+											timer: false
 										}
 									} else {
 										arrObj = {
@@ -507,7 +622,7 @@
 											content: f.content,
 											createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 											headIcon: require('../images/wyz.jpg'),
-											timer:true
+											timer: true
 										}
 									}
 								} else {
@@ -517,7 +632,7 @@
 										content: f.content,
 										createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 										headIcon: require('../images/wyz.jpg'),
-										timer:true
+										timer: true
 									}
 								}
 							}
@@ -573,15 +688,17 @@
 			//					this.getListMemberChat()
 			//				this.$refs.loadmore.onTopLoaded();
 			//			},
-			sendPic() {
-				api.upload(api.getUrl('upload'), this.formData).then(res => {
+			sendPic(params, type) {
+				api.upload(api.getUrl('upload'), params).then(res => {
 					let obj = {}
 					let arrObj = {}
 					if(res.code == '0000') {
+						this.audioUrl = 'https://cms-images.lovehaimi.com/images/resources/documentAudio/1538032236530.mp3'
+						//this.audioUrl = res.content
 						this.galleryShow = false
 						obj = {
 							direction: 2,
-							type: 2,
+							type: type,
 							content: res.content,
 							createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 							headIcon: require('../images/wyz.jpg')
@@ -593,35 +710,35 @@
 									console.log('尽力啊没有')
 									arrObj = {
 										direction: 2,
-										type: 2,
+										type: type,
 										content: res.content,
 										headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 										status: false,
 										error: false,
-										timer:false
+										timer: false
 									}
 								} else {
 									arrObj = {
 										direction: 2,
-										type: 2,
+										type: type,
 										content: res.content,
 										createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 										headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 										status: false,
 										error: false,
-										timer:true
+										timer: true
 									}
 								}
 							} else {
 								arrObj = {
 									direction: 2,
-									type: 2,
+									type: type,
 									content: res.content,
 									createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 									headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 									status: false,
 									error: false,
-									timer:true
+									timer: true
 								}
 							}
 
@@ -629,11 +746,12 @@
 						this.chatLists.push(arrObj)
 					}
 					let resObj = {
-						content: this.prefix + obj.content,
+						//content: this.prefix + obj.content,
+						content: obj.content,
 						fromUserId: this.id,
 						toUserId: this.memberIdTo,
-						type: 2
-
+						type: type,
+						duration:10
 					}
 					console.log(resObj)
 					let _this = this
@@ -645,10 +763,10 @@
 								_this.chatLists[length - 1].status = true
 								_this.chatLists[length - 1].error = true
 							}
-						}, 3000);
+						}, 30000);
 					}
 					if(ws.readyState == ws.OPEN) {
-						this.str2ab(2, JSON.stringify(resObj));
+						this.str2ab(type, JSON.stringify(resObj));
 					} else {
 						this.init()
 						let _this = this
@@ -668,13 +786,13 @@
 			tirggerFile(event, file) {
 				this.formData = new FormData()
 				this.formData.append('file', event.target.files[0])
-				this.sendPic()
+				this.sendPic(this.formData, 2)
 
 			},
 			tirggerPhoto(event, file) {
 				this.formData = new FormData()
 				this.formData.append('file', event.target.files[0])
-				this.sendPic()
+				this.sendPic(this.formData, 2)
 			},
 			changeText() {
 				this.expressionShow = false
@@ -753,15 +871,18 @@
 				console.log(this.arr)
 				for(var i = 0; i < this.arr.length; i++) {
 					if(this.arr[i - 1]) {
-						if(new Date(this.arr[i].createTime).getTime() - new Date(this.arr[i - 1].createTime).getTime() < 10000) {
+						console.log(new Date(this.arr[i].createTime).getTime() - new Date(this.arr[i - 1].createTime).getTime())
+						console.log(new Date(this.arr[i - 1].createTime).getTime() - new Date(this.arr[i].createTime).getTime())
+						if(new Date(this.arr[i].createTime).getTime() - new Date(this.arr[i - 1].createTime).getTime() > 10000) {
 							arrObj = {
 								direction: 2,
 								type: 1,
 								content: result,
 								headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
+								createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 								status: false,
 								error: false,
-								timer:false
+								timer: true
 							}
 						} else {
 							arrObj = {
@@ -772,7 +893,7 @@
 								headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 								status: false,
 								error: false,
-								timer:true
+								timer: false
 							}
 						}
 					} else {
@@ -784,7 +905,7 @@
 							headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 							status: false,
 							error: false,
-							timer:true
+							timer: true
 						}
 					}
 
@@ -797,6 +918,16 @@
 				})
 				console.log(this.toEmotion(result))
 				document.getElementById('inputs').innerHTML = ''
+				let _this = this
+					let length = _this.chatLists.length
+					if(!_this.chatLists[length - 1].status) {
+						setTimeout(function() {
+							if(!_this.chatLists[length - 1].status) {
+								_this.chatLists[length - 1].status = true
+								_this.chatLists[length - 1].error = true
+							}
+						}, 30000);
+					}
 				this.sendBtnShow = false
 				this.$refs.input.focus();
 				if(ws.readyState == ws.OPEN) {
@@ -853,8 +984,19 @@
 	.chat {
 		width: 100%;
 		height: 100%;
+		.audioStyle{
+			width:100px;
+			height:4rem;
+			 background: #FF9F9D;
+		    color: #fff;
+		    margin-right: 1.5rem;
+		    border-radius: 5rem 0 2rem 5rem;
+		    display: inline-block;
+		    position:relative;
+		    margin-top:1rem;
+		}
 		.mint-spinner-snake {
-			border-width: 2px;
+			border-width: 2px!important;
 		}
 		/*padding: 2rem;*/
 		box-sizing: border-box;
