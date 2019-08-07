@@ -53,7 +53,7 @@
 							            <div class="wifi-circle second1"></div>
 							            <div class="wifi-circle third1"></div>
 							        </div>
-								 <audio preload="auto"><source :src="l.content" type="audio/mpeg" ></audio>
+								 <audio preload="auto"><source :src="prefix+l.content" type="audio/mpeg" ></audio>
 							</div>
 						</div>
 						<div class="myself" v-if="l.direction == 2">
@@ -72,8 +72,7 @@
 							            <div class="wifi-circle second1"></div>
 							            <div class="wifi-circle third1"></div>
 							        </div>
-									<!--<img v-else src="../images/audio.png" style="width:2rem;vertical-align: middle;position: absolute; right: 2rem;top: 1rem;"/>-->
-									 <audio preload="auto"><source :src="l.content" type="audio/mpeg" ></audio>
+									 <audio preload="auto"><source :src="prefix+l.content" type="audio/mpeg" ></audio>
 								</div>
 							</div>
 						</div>
@@ -402,7 +401,7 @@
               _this.$set(l, "playing", false);
             });
 				var audio = document.querySelector('audio');
-				console.log(audio)
+				console.log(audio.duration)
 				  if (audio.paused) {
 			        // 开始播放当前点击的音频
 			        audio.play();
@@ -455,19 +454,18 @@
 		        },500);
 				});
 				btnElem.addEventListener("touchmove", function(event) {
-						console.log('进来没有啊touchmove')
 					event.preventDefault(); //阻止浏览器默认行为
 					posMove = 0;
 					posMove = event.targetTouches[0].pageY; //获取滑动实时坐标
 					if(posStart - posMove < 500) {
 						_this.voiceValue = '松开 结束';
+						_this.recordIng = true
+						_this.slideUp = false
 					} else {
-						console.log('为什么没进来这里呢呃呃呃呃呃呃呃呃呃呃呃呃呃呃呃呃呃呃呃呃呃')
 						_this.voiceValue = '松开手指，取消发送';
 						_this.slideUp = true
+						_this.recordIng = false
 					}
-					/*console.log(posStart+'---------');
-					console.log(posMove+'+++++++++');*/
 				});
 				btnElem.addEventListener("touchend", function(event) {
 					_this.slideUp = false
@@ -480,7 +478,7 @@
 					_this.voiceValue = '按住 说话';
 					console.log("End");
 					console.log(posEnd + '---------结束坐标');
-					if(posStart - posEnd < 500) {
+					if(posStart - posEnd < 200) {
 						console.log("发送成功");
 						if((_this.timeEnd - _this.timeStart) < 500){
 							 clearTimeout(_this.timeOutEvent);
@@ -531,35 +529,6 @@
 					}
 				})
 			},
-//			uploadFile(fd) {
-//				api.upload(api.getUrl('upload'), fd).then(res => {
-//					this.audioUrl = res.content
-//
-//				})
-//			},
-//			// 松开时上传语音
-//			mouseEnd() {
-//				this.clearTimer()
-//				this.endTime = new Date().getTime()
-//				if(this.recorder) {
-//					this.recorder.stop()
-//					// 重置说话时间
-//					this.num = 60
-//					this.time = '按住说话（' + this.num + '秒）'
-//					// 获取语音二进制文件
-//					let bold = this.recorder.getBlob()
-//					// 将获取的二进制对象转为二进制文件流
-//					let files = new File([bold], 'test.mp3', {
-//						type: 'audio/mp3',
-//						lastModified: Date.now()
-//					})
-//					let fd = new FormData()
-//					fd.append('file', files)
-//					//      fd.append('tenantId', 3) // 额外参数，可根据选择填写
-//					// 这里是通过上传语音文件的接口，获取接口返回的路径作为语音路径
-//					this.uploadFile(fd)
-//				}
-//			},
 			openImg() {
 				this.bigImgShow = true
 			},
@@ -572,7 +541,7 @@
 				r.onload = function() {
 					console.log(type)
 					console.log(s)
-					ws.send(new Blob([type, s]));
+					ws.send(new Blob([type,s]));
 				}
 			},
 			touchmove() { // 如果手指有移动，则取消所有事件，此时说明用户只是要移动而不是长按
@@ -584,7 +553,6 @@
 					if(msg.scrollTop < 100) {
 						if(_this.move) {
 							_this.loadingShow = true
-							console.log('男男女女女女女女女女女女女女')
 							_this.pageNo++
 								_this.getListMemberChat()
 							_this.move = false
@@ -618,9 +586,9 @@
 								arr[n].timer = true
 							}
 						}
-						console.log(arr)
+						//console.log(arr)
 						//						this.chatLists = this.recodeList.concat(this.chatLists); //倒序合并
-						this.chatLists = res.content.concat(this.chatLists);;
+						this.chatLists = res.content.concat(this.chatLists);
 						this.loadingShow = false
 						this.move = true
 						if(res.content.length < 10) {
@@ -628,7 +596,7 @@
 							return;
 						}
 						this.$nextTick(function() {
-							console.log('hhhhhhhhhhhhhhhhhhhh')
+							//console.log('hhhhhhhhhhhhhhhhhhhh')
 							let msg = document.getElementById('content') // 获取对象
 							let innerHeight = document.querySelector('.content').clientHeight
 							// 变量scrollTop是滚动条滚动时，距离顶部的距离
@@ -644,18 +612,17 @@
 			init() {
 				let _this = this
 				ws = new WebSocket(this.websocketurl + "/chat/binarySocketServer?userId=" + this.id);
-				console.log('gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg')
 				ws.onmessage = (evnt) => {
 					let content = evnt.data;
 					_this.onmessage = true
-					console.log('contentcontentcontentcontentcontentcontentcontent' + typeof(content)+content)
+					//console.log('contentcontentcontentcontentcontentcontentcontent' + typeof(content)+content)
 					if(typeof(content) == 'string') {
 						if(JSON.parse(content).status == 1) {
-							console.log('成功了')
+							//console.log('成功了')
 							let length = _this.chatLists.length
 							_this.chatLists[length - 1].status = true
 							_this.chatLists[length - 1].error = false
-							console.log(_this.chatLists)
+							//console.log(_this.chatLists)
 							clearTimeout(_this.timemessage)
 						} else if(JSON.parse(content).status == 0) {
 							let length = _this.chatLists.length
@@ -669,9 +636,8 @@
 						let arrObj = {}
 						reader.onload = function(evnt) {
 							str = reader.result; //内容就在这里
-							console.log('sssssssssssssssssssssssssssssss' + str)
 							var f = JSON.parse(str.substring(1))
-							console.log(str)
+							//console.log(str)
 							obj = {
 								direction: 1,
 								type: str.substring(0, 1),
@@ -714,7 +680,6 @@
 							_this.chatLists.push(arrObj)
 						};
 						reader.readAsText(content);
-						console.log(_this.chatLists)
 					}
 				};
 				ws.onerror = function(evnt) {
@@ -758,11 +723,6 @@
 				this.expressionShow = false;
 				this.galleryShow = false
 			},
-			//			loadTop() {
-			//				this.pageNo++
-			//					this.getListMemberChat()
-			//				this.$refs.loadmore.onTopLoaded();
-			//			},
 			sendPic(params, type) {
 				api.upload(api.getUrl('upload'), params).then(res => {
 					let obj = {}
@@ -778,9 +738,15 @@
 							headIcon: require('../images/wyz.jpg')
 						}
 						this.arr.push(obj)
-						for(var i = 0; i < this.arr.length; i++) {
-							if(this.arr[i - 1]) {
-								if(new Date(this.arr[i].createTime).getTime() - new Date(this.arr[i - 1].createTime).getTime() < 10000) {
+						if(this.chatLists && this.chatLists.length >0){
+							this.arr = this.arr.concat(this.chatLists)
+						}
+				let len = this.arr.length-1;
+							if(len > 0) {
+							console.log(this.arr)
+							console.log(this.arr[0].content)
+							console.log(this.arr[len].content)
+							if(new Date(this.arr[0].createTime).getTime() - new Date(this.arr[len].createTime).getTime() < 10000) {
 									console.log('尽力啊没有')
 									arrObj = {
 										direction: 2,
@@ -819,7 +785,6 @@
 								}
 							}
 
-						}
 						this.chatLists.push(arrObj)
 					}
 					this.$nextTick(() => {
@@ -827,7 +792,7 @@
 					msg.scrollTop = msg.scrollHeight // 滚动高度
 				})
 					let resObj = {
-						content: this.prefix + obj.content,
+						content: obj.content,
 						//content: 'https://cms-images.lovehaimi.com/images/resources/documentAudio/1538032236530.mp3',
 						fromUserId: this.id,
 						toUserId: this.memberIdTo,
@@ -939,7 +904,7 @@
 					toUserId: this.memberIdTo,
 					type: 1
 				}
-				console.log(resObj)
+//				console.log(resObj)
 				//调用后台handleTextMessage方法    
 				obj = {
 					direction: 2,
@@ -948,12 +913,16 @@
 					createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss")
 				}
 				this.arr.push(obj)
-				console.log(this.arr)
-				for(var i = 0; i < this.arr.length; i++) {
-					if(this.arr[i - 1]) {
-						console.log(new Date(this.arr[i].createTime).getTime() - new Date(this.arr[i - 1].createTime).getTime())
-						console.log(new Date(this.arr[i - 1].createTime).getTime() - new Date(this.arr[i].createTime).getTime())
-						if(new Date(this.arr[i].createTime).getTime() - new Date(this.arr[i - 1].createTime).getTime() > 10000) {
+				if(this.chatLists && this.chatLists.length >0){
+					this.arr = this.arr.concat(this.chatLists)
+				}
+				//console.log(this.arr)
+				let len = this.arr.length-1;
+					if(len > 0) {
+						console.log(this.arr)
+						console.log(this.arr[0].content)
+						console.log(this.arr[len].content)
+						if(new Date(this.arr[0].createTime).getTime() - new Date(this.arr[len].createTime).getTime() > 10000) {
 							arrObj = {
 								direction: 2,
 								type: 1,
@@ -988,10 +957,7 @@
 							timer: true
 						}
 					}
-
-				}
 				this.chatLists.push(arrObj)
-				console.log(this.chatLists)
 				this.$nextTick(() => {
 					let msg = document.getElementById('content') // 获取对象
 					msg.scrollTop = msg.scrollHeight // 滚动高度
