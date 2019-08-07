@@ -121,12 +121,12 @@ let HZRecorder = function (stream, config) {
   }
 
   // 回放
-  this.play = function (audio) {
-    let downRec = document.getElementById('downloadRec')
-    downRec.href = window.URL.createObjectURL(this.getBlob())
-    downRec.download = new Date().toLocaleString() + '.mp3'
-    audio.src = window.URL.createObjectURL(this.getBlob())
-  }
+//this.play = function (audio) {
+//  let downRec = document.getElementById('downloadRec')
+//  downRec.href = window.URL.createObjectURL(this.getBlob())
+//  downRec.download = new Date().toLocaleString() + '.mp3'
+//  audio.src = window.URL.createObjectURL(this.getBlob())
+//}
 
   // 上传
   this.upload = function (url, callback) {

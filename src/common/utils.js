@@ -751,11 +751,11 @@ export const getWebsocketURL = () =>{
   var websocketurl = ''
   let hostname = window.location.host
  	if(hostname == 'localhost:8081'){
-  	websocketurl = 'ws://99.48.68.109:8092'
+  	websocketurl = 'ws://99.48.68.111:8092'
   }else if(hostname == '99.48.68.95'){
-  	websocketurl = 'ws://99.48.68.109:8092'
+  	websocketurl = 'ws://99.48.68.111:8092'
   }else if(hostname == '99.48.68.109:92'){
-    websocketurl = 'ws://99.48.68.109:8092'
+    websocketurl = 'ws://99.48.68.111:8092'
   }else{
   	 websocketurl = 'wss://customer.lovehaimi.com'
   }

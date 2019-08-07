@@ -11,13 +11,13 @@
 					<div v-if="l.type == 0 || l.type == 1">
 						<div class="friend" v-if="l.direction == 1">
 							<img :src="l.headIcon" class="touxiang" />
-							<p v-html="$utils.toEmotion(l.content)"></p>
+							<div v-html="$utils.toEmotion(l.content)" class="xiaoxi"></div>
 						</div>
 						<div class="myself" v-if="l.direction == 2">
 							<div class="loadingStyle">
 								<mt-spinner type="snake" :size="10" class="spinner" v-if="!l.status"></mt-spinner>
 								<img src="../images/error.png" v-if="l.error" style="width:1.6rem" />
-								<p v-html="$utils.toEmotion(l.content)"></p>
+								<div class="xiaoxi" v-html="$utils.toEmotion(l.content)"></div>
 							</div>
 							<img :src="l.headIcon" class="touxiang" />
 						</div>
@@ -42,21 +42,39 @@
 					<div v-if="l.type == 3">
 						<div class="friend" v-if="l.direction == 1">
 							<img :src="l.headIcon" class="touxiang" />
-							<audio :src="prefix+audioUrl" controls="controls" class="content-audio" style="display: block;">语音</audio>
+							<div class="audioStylefriend" @click="play(index)">
+									<div class="wifi-symbol" v-if="l.playing" style="transform: rotate(135deg); left: 2rem;">
+							            <div class="wifi-circle first"></div>
+							            <div class="wifi-circle second"></div>
+							            <div class="wifi-circle third"></div>
+							        </div>
+									 <div class="wifi-symbol" v-else style="transform: rotate(135deg); left: 2rem;">
+							            <div class="wifi-circle first"></div>
+							            <div class="wifi-circle second1"></div>
+							            <div class="wifi-circle third1"></div>
+							        </div>
+								 <audio preload="auto"><source :src="l.content" type="audio/mpeg" ></audio>
+							</div>
 						</div>
 						<div class="myself" v-if="l.direction == 2">
 							<img :src="l.headIcon" class="touxiang" />
 							<div class="loadingStyle">
 								<mt-spinner type="snake" :size="10" class="spinner" v-if="!l.status"></mt-spinner>
-								<img src="../images/error.png" v-if="l.error" style="width:1.6rem;float:left" />
-							<!--	<audio :src="prefix+audioUrl" controls class="content-audio"></audio>-->
-								<div class="audioStyle" @click="play">
-									<img src="../images/audio.png" style="width:2rem;vertical-align: middle;position: absolute; right: 2rem;top: 1rem;"/>
-									 <audio preload="auto" id="downloadRec"><source :src="audioUrl" type="audio/mpeg" ></audio>
+								<img src="../images/error.png" v-if="l.error" style="width:1.6rem ;float: left;vertical-align: middle; margin-top: 15px;" />
+								<div class="audioStyle" @click="play(index)">
+									 <div class="wifi-symbol" v-if="l.playing">
+							            <div class="wifi-circle first"></div>
+							            <div class="wifi-circle second"></div>
+							            <div class="wifi-circle third"></div>
+							        </div>
+									 <div class="wifi-symbol" v-else>
+							            <div class="wifi-circle first"></div>
+							            <div class="wifi-circle second1"></div>
+							            <div class="wifi-circle third1"></div>
+							        </div>
+									<!--<img v-else src="../images/audio.png" style="width:2rem;vertical-align: middle;position: absolute; right: 2rem;top: 1rem;"/>-->
+									 <audio preload="auto"><source :src="l.content" type="audio/mpeg" ></audio>
 								</div>
-								<!--<audio controls>
-									  <source :src="audioUrl" type="audio/mpeg">
-								</audio>-->
 							</div>
 						</div>
 						<div class="bigImg" v-show="bigImgShow" @click="bigImgShow=false">
@@ -68,13 +86,29 @@
 			<div style="width:100%;height:100px" v-if="expressionShow || galleryShow"></div>
 			<!--</mt-loadmore>-->
 		</div>
+		<div class="wraperBox" v-show="recordIng">
+			<div style="text-align: center;" >
+				<img src="../images/record.png" style="width:3.3rem;margin-top:2rem"/>
+				<div style="color:#999;margin-top:1.5rem;font-size:1.2rem;">手指上滑，取消发送</div>
+			</div>
+		</div>
+		<div class="wraperBox" v-show="slideUp">
+			<div style="text-align: center;" v-show="slideUp">
+				<img src="../images/reset.png" style="width:3.3rem;margin-top:2rem"/>
+				<div style="color:#999;margin-top:1.5rem;font-size:1.2rem;">手指上滑，取消发送</div>
+			</div>
+		</div>
 		<div class="tips">
 			<div style="margin-bottom:2rem;margin-left:2rem">
-				<img src="../images/audio.png" style="width:3rem;vertical-align: middle;" id="messageBtn" />
-				<div class="inputBtn">
+				<img src="../images/audio.png" style="width:3rem;vertical-align: middle;"  @click="getRecord" v-show="!recordShow"/>
+				<img src="../images/keybord.png" style="width:3rem;vertical-align: middle;"  @click="getText" v-show="recordShow"/>
+				<div class="inputBtn" v-show="!recordShow">
 					<div contenteditable="true" class="tipsInput" @input="changeText" id="inputs" @focus="focusfns" ref="input">
 						<img :src='item' v-for="item in selectPicLists" style="width:20px;margin-right:5px;vertical-align: middle;" />
 					</div>
+				</div>
+				<div class="inputBtn" v-show="recordShow">
+					<el-button id="messageBtn" class="touchDownStyle">{{voiceValue}}</el-button>
 				</div>
 				<img src="../images/biaoqing.png" class="photo" @click="openExpression" style="margin-left:1.5rem" />
 				<img src="../images/add.png" class="expression" @click="openGallery" style="margin-left:1.5rem" v-if="!sendBtnShow" />
@@ -114,6 +148,10 @@
 		name: 'chat',
 		data() {
 			return {
+				recordIng:false,
+				slideUp:false,
+				voiceValue:'按住说话',
+				recordShow:false,
 				bigImgShow: false,
 				defaultShow: true,
 				allLoaded: false,
@@ -341,8 +379,7 @@
 				loadingShow: false,
 				chatRecord: [],
 				recodeList: [],
-				prefix: 'http://99.48.68.109:8092/chat/storage/display/',
-				audioUrl: ''
+				prefix: 'http://99.48.68.111:8092/chat/storage/display/'
 			}
 		},
 		mounted() {
@@ -353,18 +390,33 @@
 			this.initEvent()
 		},
 		methods: {
-			play(){
+			getRecord(){
+				this.recordShow = true
+			},
+			getText(){
+				this.recordShow = false 
+			},
+			play(index){
+			let _this = this
+            this.chatLists.forEach(function(l) {
+              _this.$set(l, "playing", false);
+            });
 				var audio = document.querySelector('audio');
+				console.log(audio)
 				  if (audio.paused) {
 			        // 开始播放当前点击的音频
 			        audio.play();
+			        this.chatLists[index].playing = true
 			    } else {
 			        audio.pause();
+			         this.chatLists[index].playing = false
 			    }
+			    console.log(this.chatLists)
 			},
 			save() {
 				//ajax
 				this.clearTimer()
+				this.recordIng = false
 				this.endTime = new Date().getTime()
 				if(this.recorder) {
 					this.recorder.stop()
@@ -389,6 +441,8 @@
 				let _this = this
 				var btnElem = document.getElementById("messageBtn"); //获取ID
 				btnElem.addEventListener("touchstart", function(event) {
+					_this.timeStart = new Date().getTime()
+					console.log('进来没有啊touchstart')
 					event.preventDefault(); //阻止浏览器默认行为
 					posStart = 0;
 					posStart = event.touches[0].pageY; //获取起点坐标
@@ -396,29 +450,48 @@
 					console.log("start");
 					console.log(posStart + '---------开始坐标');
 					_this.mouseStart()
+				 _this.timeOutEvent =setTimeout(function(){
+		         _this.recordIng = true
+		        },500);
 				});
 				btnElem.addEventListener("touchmove", function(event) {
+						console.log('进来没有啊touchmove')
 					event.preventDefault(); //阻止浏览器默认行为
 					posMove = 0;
 					posMove = event.targetTouches[0].pageY; //获取滑动实时坐标
 					if(posStart - posMove < 500) {
-						btnElem.value = '松开 结束';
+						_this.voiceValue = '松开 结束';
 					} else {
-						btnElem.value = '松开手指，取消发送';
+						console.log('为什么没进来这里呢呃呃呃呃呃呃呃呃呃呃呃呃呃呃呃呃呃呃呃呃呃')
+						_this.voiceValue = '松开手指，取消发送';
+						_this.slideUp = true
 					}
 					/*console.log(posStart+'---------');
 					console.log(posMove+'+++++++++');*/
 				});
 				btnElem.addEventListener("touchend", function(event) {
+					_this.slideUp = false
+					 _this.recordIng = false
+					_this.timeEnd = new Date().getTime()
+					console.log('进来没有啊touchend')
 					event.preventDefault();
 					posEnd = 0;
 					posEnd = event.changedTouches[0].pageY; //获取终点坐标
-					btnElem.value = '按住 说话';
+					_this.voiceValue = '按住 说话';
 					console.log("End");
 					console.log(posEnd + '---------结束坐标');
 					if(posStart - posEnd < 500) {
 						console.log("发送成功");
-						_this.save();
+						if((_this.timeEnd - _this.timeStart) < 500){
+							 clearTimeout(_this.timeOutEvent);
+						}else if((_this.timeEnd - _this.timeStart) < 1000){
+//							Toast('录制时间太短')
+ 							clearTimeout(_this.timeOutEvent);
+						}else{
+							console.log(_this.timeEnd - _this.timeStart)
+							_this.save();
+						}
+						
 					} else {
 						console.log("取消发送");
 						console.log("Cancel");
@@ -451,8 +524,6 @@
 									this.num = 60
 									this.clearTimer()
 								} else {
-									this.num--
-										this.time = '松开结束（' + this.num + '秒）'
 									this.recorder.start()
 								}
 							}, 1000)
@@ -460,35 +531,35 @@
 					}
 				})
 			},
-			uploadFile(fd) {
-				api.upload(api.getUrl('upload'), fd).then(res => {
-					this.audioUrl = res.content
-
-				})
-			},
-			// 松开时上传语音
-			mouseEnd() {
-				this.clearTimer()
-				this.endTime = new Date().getTime()
-				if(this.recorder) {
-					this.recorder.stop()
-					// 重置说话时间
-					this.num = 60
-					this.time = '按住说话（' + this.num + '秒）'
-					// 获取语音二进制文件
-					let bold = this.recorder.getBlob()
-					// 将获取的二进制对象转为二进制文件流
-					let files = new File([bold], 'test.mp3', {
-						type: 'audio/mp3',
-						lastModified: Date.now()
-					})
-					let fd = new FormData()
-					fd.append('file', files)
-					//      fd.append('tenantId', 3) // 额外参数，可根据选择填写
-					// 这里是通过上传语音文件的接口，获取接口返回的路径作为语音路径
-					this.uploadFile(fd)
-				}
-			},
+//			uploadFile(fd) {
+//				api.upload(api.getUrl('upload'), fd).then(res => {
+//					this.audioUrl = res.content
+//
+//				})
+//			},
+//			// 松开时上传语音
+//			mouseEnd() {
+//				this.clearTimer()
+//				this.endTime = new Date().getTime()
+//				if(this.recorder) {
+//					this.recorder.stop()
+//					// 重置说话时间
+//					this.num = 60
+//					this.time = '按住说话（' + this.num + '秒）'
+//					// 获取语音二进制文件
+//					let bold = this.recorder.getBlob()
+//					// 将获取的二进制对象转为二进制文件流
+//					let files = new File([bold], 'test.mp3', {
+//						type: 'audio/mp3',
+//						lastModified: Date.now()
+//					})
+//					let fd = new FormData()
+//					fd.append('file', files)
+//					//      fd.append('tenantId', 3) // 额外参数，可根据选择填写
+//					// 这里是通过上传语音文件的接口，获取接口返回的路径作为语音路径
+//					this.uploadFile(fd)
+//				}
+//			},
 			openImg() {
 				this.bigImgShow = true
 			},
@@ -577,11 +648,15 @@
 				ws.onmessage = (evnt) => {
 					let content = evnt.data;
 					_this.onmessage = true
-					console.log('contentcontentcontentcontentcontentcontentcontent' + typeof(content))
+					console.log('contentcontentcontentcontentcontentcontentcontent' + typeof(content)+content)
 					if(typeof(content) == 'string') {
 						if(JSON.parse(content).status == 1) {
+							console.log('成功了')
 							let length = _this.chatLists.length
 							_this.chatLists[length - 1].status = true
+							_this.chatLists[length - 1].error = false
+							console.log(_this.chatLists)
+							clearTimeout(_this.timemessage)
 						} else if(JSON.parse(content).status == 0) {
 							let length = _this.chatLists.length
 							_this.chatLists[length - 1].status = true
@@ -693,8 +768,7 @@
 					let obj = {}
 					let arrObj = {}
 					if(res.code == '0000') {
-						this.audioUrl = 'https://cms-images.lovehaimi.com/images/resources/documentAudio/1538032236530.mp3'
-						//this.audioUrl = res.content
+						//this.audioUrl = 'https://cms-images.lovehaimi.com/images/resources/documentAudio/1538032236530.mp3'
 						this.galleryShow = false
 						obj = {
 							direction: 2,
@@ -712,6 +786,7 @@
 										direction: 2,
 										type: type,
 										content: res.content,
+										//content: 'https://cms-images.lovehaimi.com/images/resources/documentAudio/1538032236530.mp3',
 										headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 										status: false,
 										error: false,
@@ -722,6 +797,7 @@
 										direction: 2,
 										type: type,
 										content: res.content,
+										//content: 'https://cms-images.lovehaimi.com/images/resources/documentAudio/1538032236530.mp3',
 										createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 										headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 										status: false,
@@ -734,6 +810,7 @@
 									direction: 2,
 									type: type,
 									content: res.content,
+									//content: 'https://cms-images.lovehaimi.com/images/resources/documentAudio/1538032236530.mp3',
 									createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 									headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 									status: false,
@@ -745,25 +822,28 @@
 						}
 						this.chatLists.push(arrObj)
 					}
+					this.$nextTick(() => {
+					let msg = document.getElementById('content') // 获取对象
+					msg.scrollTop = msg.scrollHeight // 滚动高度
+				})
 					let resObj = {
-						//content: this.prefix + obj.content,
-						content: obj.content,
+						content: this.prefix + obj.content,
+						//content: 'https://cms-images.lovehaimi.com/images/resources/documentAudio/1538032236530.mp3',
 						fromUserId: this.id,
 						toUserId: this.memberIdTo,
-						type: type,
-						duration:10
+						type: type
 					}
 					console.log(resObj)
 					let _this = this
 					let length = this.chatLists.length
 					if(!this.chatLists[length - 1].status) {
-						setTimeout(function() {
-							console.log(_this.chatLists[length - 1].status)
+						_this.timemessage = setTimeout(function() {
+							Toast('ffffff')
 							if(!_this.chatLists[length - 1].status) {
 								_this.chatLists[length - 1].status = true
 								_this.chatLists[length - 1].error = true
 							}
-						}, 30000);
+						}, 3000);
 					}
 					if(ws.readyState == ws.OPEN) {
 						this.str2ab(type, JSON.stringify(resObj));
@@ -920,14 +1000,13 @@
 				document.getElementById('inputs').innerHTML = ''
 				let _this = this
 					let length = _this.chatLists.length
-					if(!_this.chatLists[length - 1].status) {
-						setTimeout(function() {
+						_this.timemessage = setTimeout(function() {
+								Toast('执行没有')
 							if(!_this.chatLists[length - 1].status) {
 								_this.chatLists[length - 1].status = true
 								_this.chatLists[length - 1].error = true
 							}
-						}, 30000);
-					}
+						}, 3000);
 				this.sendBtnShow = false
 				this.$refs.input.focus();
 				if(ws.readyState == ws.OPEN) {
@@ -984,6 +1063,71 @@
 	.chat {
 		width: 100%;
 		height: 100%;
+		.wifi-symbol {
+            width: 4rem;
+            height: 4rem;
+            box-sizing: border-box;
+            overflow: hidden;
+            transform: rotate(-45deg);
+            position: absolute;
+            right:2rem
+        }
+        .wifi-circle {
+            border: 2px solid #fff;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .first {
+            width: 5px;
+            height: 5px;
+            background: #fff;
+            top: 37px;
+            left: 37px;
+        }
+        .second {
+            width: 20px;
+            height: 20px;
+            top: 30px;
+            left: 30px;
+            animation: fadeInOut 1s infinite 0.2s;
+        }
+        .third {
+            width: 25px;
+            height: 25px;
+            top: 25px;
+            left: 25px;
+            animation: fadeInOut 1s infinite 0.4s;
+        }
+  		.second1 {
+            width: 20px;
+            height: 20px;
+            top: 30px;
+            left: 30px;
+        }
+        .third1 {
+            width: 25px;
+            height: 25px;
+            top: 25px;
+            left: 25px;
+        }
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0; /*初始状态 透明度为0*/
+            }
+            100% {
+                opacity: 1; /*结尾状态 透明度为1*/
+            }
+        }
+        .audioStylefriend{
+        	width:100px;
+			height:4rem;
+		    display: inline-block;
+		    position:relative;
+		 	 background: #FFF1F1;
+					color: #333;
+					margin-left: 1.5rem;
+					border-radius: 0px 5rem 5rem 2rem;
+        }
 		.audioStyle{
 			width:100px;
 			height:4rem;
@@ -993,7 +1137,6 @@
 		    border-radius: 5rem 0 2rem 5rem;
 		    display: inline-block;
 		    position:relative;
-		    margin-top:1rem;
 		}
 		.mint-spinner-snake {
 			border-width: 2px!important;
@@ -1086,9 +1229,8 @@
 				.touxiang {
 					width: 3rem;
 					vertical-align: middle;
-					margin-top: 10px;
 				}
-				p {
+				.xiaoxi {
 					display: inline-block;
 					padding: 1.2rem;
 					font-size: 1.3rem;
@@ -1101,7 +1243,7 @@
 				.touxiang {
 					float: left;
 				}
-				p {
+				.xiaoxi {
 					background: #FFF1F1;
 					color: #333;
 					margin-left: 1.5rem;
@@ -1124,13 +1266,25 @@
 				.touxiang {
 					float: right;
 				}
-				p {
+				.xiaoxi {
 					background: #FF9F9D;
 					color: #fff;
 					margin-right: 1.5rem;
 					border-radius: 5rem 0 2rem 5rem;
 				}
 			}
+		}
+		.wraperBox{
+			width:12.5rem;
+			height:12.5rem;
+			background:#fff;
+			box-shadow:0px 10px 20px 0px rgba(237,237,237,0.5);
+			border-radius:2rem;
+			position:fixed;
+			left:50%;
+			top:50%;
+			margin-top:-6.25rem;
+			margin-left:-6.25rem;
 		}
 		.tips {
 			width: 100%;
@@ -1168,6 +1322,16 @@
 				}
 				.sendBtn {
 					float: right;
+				}
+				.touchDownStyle{
+					width:100%;
+					width: 100%;
+				    height: 4rem;
+				    background: #FF9F9D;
+				    color: #fff;
+				    border-radius: 2rem;
+				    outline: none;
+				    border: none;
 				}
 			}
 		}
