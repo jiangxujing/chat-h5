@@ -1,7 +1,7 @@
 <template>
 	<div class="chat" id="chat">
-		<div class="content" id="content" @touchmove="touchmove()">
-			<!--<mt-loadmore :top-method="loadTop" :bottom-all-loaded="allLoaded" ref="loadmore">-->
+		<div class="content" id="content" @touchmove="touchmoveDown()">
+		<!--	<mt-loadmore :top-method="loadTop" :bottom-all-loaded="allLoaded" ref="loadmore">-->
 			<div v-show="loadingShow" style="text-align: center;">
 				<img src="../images/loading.png" style="width:2rem;" />
 			</div>
@@ -42,7 +42,8 @@
 					<div v-if="l.type == 3">
 						<div class="friend" v-if="l.direction == 1">
 							<img :src="l.headIcon" class="touxiang" />
-							<div class="audioStylefriend" @click="play(index)">
+							<div style="position: relative;display: inline-block;">
+									<div class="audioStylefriend" @click="play(l.content,index)" :style="{'width': (l.duration*5) + 'px'}" v-if="!l.playing">
 									<div class="wifi-symbol" v-if="l.playing" style="transform: rotate(135deg); left: 2rem;">
 							            <div class="wifi-circle first"></div>
 							            <div class="wifi-circle second"></div>
@@ -60,13 +61,34 @@
 										<source :src="prefix+l.content" type="audio/mpeg">
 									</audio>
 							</div>
+							<div class="audioStylefriend" @click="pauseFun(l.content,index)" v-else :style="{'width': (l.duration*5) + 'px'}">
+									<div class="wifi-symbol" v-if="l.playing" style="transform: rotate(135deg); left: 2rem;">
+							            <div class="wifi-circle first"></div>
+							            <div class="wifi-circle second"></div>
+							            <div class="wifi-circle third"></div>
+							        </div>
+									 <div class="wifi-symbol" v-else style="transform: rotate(135deg); left: 2rem;">
+							            <div class="wifi-circle first"></div>
+							            <div class="wifi-circle second1"></div>
+							            <div class="wifi-circle third1"></div>
+							        </div>
+								 	<audio preload="auto" v-if="l.playing" id="gg">
+										<source :src="prefix+l.content" type="audio/mpeg">
+									</audio>
+									<audio preload="auto">
+										<source :src="prefix+l.content" type="audio/mpeg">
+									</audio>
+							</div>
+							 <span class="durationFriend">{{l.duration}}″</span>
+							</div>
 						</div>
 						<div class="myself" v-if="l.direction == 2">
 							<img :src="l.headIcon" class="touxiang" />
 							<div class="loadingStyle">
 								<mt-spinner type="snake" :size="10" class="spinner" v-if="!l.status"></mt-spinner>
 								<img src="../images/error.png" v-if="l.error" style="width:1.6rem ;float: left;vertical-align: middle; margin-top: 15px;" />
-								<div class="audioStyle" @click="play(index)">
+								  <span class="duration">{{l.duration}}″</span>
+								<div class="audioStyle" @click="play(l.content,index)" v-if="!l.playing" :style="{'width': (l.duration*5) + 'px'}">
 									 <div class="wifi-symbol" v-if="l.playing">
 							            <div class="wifi-circle first"></div>
 							            <div class="wifi-circle second"></div>
@@ -82,6 +104,24 @@
 									</audio>
 									<audio preload="auto">
 										<source :src="prefix+l.content" type="audio/mpeg">
+									</audio>
+								</div>
+								<div class="audioStyle" @click="pauseFun(l.content,index)" v-else :style="{'width': (l.duration*5) + 'px'}">
+									 <div class="wifi-symbol" v-if="l.playing">
+							            <div class="wifi-circle first"></div>
+							            <div class="wifi-circle second"></div>
+							            <div class="wifi-circle third"></div>
+							        </div>
+									 <div class="wifi-symbol" v-else>
+							            <div class="wifi-circle first"></div>
+							            <div class="wifi-circle second1"></div>
+							            <div class="wifi-circle third1"></div>
+							        </div>
+									 <audio preload="auto" v-if="l.playing" id="gg">
+										<source :src="prefix+l.content">
+									</audio>
+									<audio preload="auto">
+										<source :src="prefix+l.content">
 									</audio>
 								</div>
 							</div>
@@ -405,21 +445,35 @@
 			getText() {
 				this.recordShow = false
 			},
-			play(index) {
-					let _this = this
+			pauseFun(data,index){
+				 this.audio.pause();
+				 this.chatLists[index].playing = false
+				  clearInterval(this.tiemr);
+			},
+			play(data,index) {
+				let _this = this
 				this.chatLists.forEach(function(l) {
 					_this.$set(l, "playing", false);
 				});
-				this.chatLists[index].playing = true
-				this.$nextTick(() => {
-					var audio = document.getElementById('gg');
-					if(audio.paused) {
-						audio.play();
-					} else {
-						audio.pause()
-						this.chatLists[index].playing = false
-					}
-				})
+				this.audio = new Audio();
+				this.audio.src = this.prefix+data;
+				let playPromise; 
+				let second = 5
+				playPromise = this.audio.play();
+				if (playPromise) {
+					this.chatLists[index].playing = true
+				        playPromise.then(() => {
+				        _this.tiemr = setTimeout(() => {
+                    }, _this.audio.duration * 1000); // audio.duration 为音频的时长单位为秒
+					_this.audio.addEventListener('ended', function () {  
+						console.log('播放完毕')
+					    _this.chatLists[index].playing = false
+					}, false);
+				        }).catch((e) => {
+				        	 _this.audio.load();
+				          console.error(e);
+				        });
+				      }
 			},
 			save() {
 				//ajax
@@ -495,7 +549,8 @@
 							//							Toast('录制时间太短')
 							clearTimeout(_this.timeOutEvent);
 						} else {
-							console.log(_this.timeEnd - _this.timeStart)
+							console.log()
+							_this.duration = (_this.timeEnd - _this.timeStart)/1000
 							_this.save();
 						}
 
@@ -553,7 +608,7 @@
 					ws.send(new Blob([type, s]));
 				}
 			},
-			touchmove() { // 如果手指有移动，则取消所有事件，此时说明用户只是要移动而不是长按
+			touchmoveDown() { // 如果手指有移动，则取消所有事件，此时说明用户只是要移动而不是长按
 				let _this = this
 				this.$nextTick(function() {
 					console.log('hhhhhhhhhhhhhhhhhhhh')
@@ -577,7 +632,6 @@
 				}
 				api.post(api.getUrl('getListMemberChat'), req).then(res => {
 					let _this = this
-
 					if(res.code == '0000') {
 						let arr = res.content.reverse();
 						arr.forEach(function(i) {
@@ -595,9 +649,11 @@
 								arr[n].timer = true
 							}
 						}
-						//console.log(arr)
-						//						this.chatLists = this.recodeList.concat(this.chatLists); //倒序合并
 						this.chatLists = res.content.concat(this.chatLists);
+						this.chatLists.forEach(function(l) {
+							_this.$set(l, "duration", '16');
+						});
+						console.log(this.chatLists)
 						this.loadingShow = false
 						this.move = true
 						if(res.content.length < 10) {
@@ -605,7 +661,7 @@
 							return;
 						}
 						this.$nextTick(function() {
-							//console.log('hhhhhhhhhhhhhhhhhhhh')
+							console.log('还能能女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女')
 							let msg = document.getElementById('content') // 获取对象
 							let innerHeight = document.querySelector('.content').clientHeight
 							// 变量scrollTop是滚动条滚动时，距离顶部的距离
@@ -613,7 +669,7 @@
 							// 变量scrollHeight是滚动条的总高度
 							let scrollHeight = document.documentElement.clientHeight || document.body.scrollHeight
 							//msg.scrollTop = innerHeight + scrollHeight + scrollTop+500
-							msg.scrollTop = innerHeight + scrollTop + scrollHeight - 100
+							msg.scrollTop =scrollHeight+scrollTop
 						})
 					}
 				})
@@ -624,7 +680,7 @@
 				ws.onmessage = (evnt) => {
 					let content = evnt.data;
 					_this.onmessage = true
-					//console.log('contentcontentcontentcontentcontentcontentcontent' + typeof(content)+content)
+					console.log('contentcontentcontentcontentcontentcontentcontent' + typeof(content)+content)
 					if(typeof(content) == 'string') {
 						if(JSON.parse(content).status == 1) {
 							//console.log('成功了')
@@ -737,7 +793,6 @@
 					let obj = {}
 					let arrObj = {}
 					if(res.code == '0000') {
-						//this.audioUrl = 'https://cms-images.lovehaimi.com/images/resources/documentAudio/1538032236530.mp3'
 						this.galleryShow = false
 						obj = {
 							direction: 2,
@@ -761,23 +816,23 @@
 									direction: 2,
 									type: type,
 									content: res.content,
-									//content: 'https://cms-images.lovehaimi.com/images/resources/documentAudio/1538032236530.mp3',
 									headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 									status: false,
 									error: false,
-									timer: false
+									timer: false,
+									duration:this.duration
 								}
 							} else {
 								arrObj = {
 									direction: 2,
 									type: type,
 									content: res.content,
-									//content: 'https://cms-images.lovehaimi.com/images/resources/documentAudio/1538032236530.mp3',
 									createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 									headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 									status: false,
 									error: false,
-									timer: true
+									timer: true,
+									duration:this.duration
 								}
 							}
 						} else {
@@ -785,12 +840,12 @@
 								direction: 2,
 								type: type,
 								content: res.content,
-								//content: 'https://cms-images.lovehaimi.com/images/resources/documentAudio/1538032236530.mp3',
 								createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 								headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 								status: false,
 								error: false,
-								timer: true
+								timer: true,
+								duration:this.duration
 							}
 						}
 
@@ -802,7 +857,6 @@
 					})
 					let resObj = {
 						content: obj.content,
-						//content: 'https://cms-images.lovehaimi.com/images/resources/documentAudio/1538032236530.mp3',
 						fromUserId: this.id,
 						toUserId: this.memberIdTo
 						//						type: type
@@ -1096,7 +1150,8 @@
 			}
 		}
 		.audioStylefriend {
-			width: 100px;
+			/*width: 100px;*/
+			min-width:4rem;
 			height: 4rem;
 			display: inline-block;
 			position: relative;
@@ -1106,7 +1161,8 @@
 			border-radius: 0px 5rem 5rem 2rem;
 		}
 		.audioStyle {
-			width: 100px;
+			/*width: 100px;*/
+			min-width:4rem;
 			height: 4rem;
 			background: #FF9F9D;
 			color: #fff;
@@ -1115,6 +1171,18 @@
 			display: inline-block;
 			position: relative;
 		}
+		.durationFriend{
+			color:#FF9F9D;
+				float: right;
+			    margin-top: 1.5rem;
+			    margin-left:1rem;
+		}
+		.duration{
+				color:#FF9F9D;
+				float: left;
+			    margin-top: 1.5rem;
+			    margin-right:1rem;
+			}
 		.mint-spinner-snake {
 			border-width: 2px!important;
 		}
