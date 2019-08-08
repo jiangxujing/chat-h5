@@ -53,7 +53,12 @@
 							            <div class="wifi-circle second1"></div>
 							            <div class="wifi-circle third1"></div>
 							        </div>
-								 <audio preload="auto"><source :src="prefix+l.content" type="audio/mpeg" ></audio>
+								 	<audio preload="auto" v-if="l.playing" id="gg">
+										<source :src="prefix+l.content" type="audio/mpeg">
+									</audio>
+									<audio preload="auto">
+										<source :src="prefix+l.content" type="audio/mpeg">
+									</audio>
 							</div>
 						</div>
 						<div class="myself" v-if="l.direction == 2">
@@ -72,7 +77,12 @@
 							            <div class="wifi-circle second1"></div>
 							            <div class="wifi-circle third1"></div>
 							        </div>
-									 <audio preload="auto"><source :src="prefix+l.content" type="audio/mpeg" ></audio>
+									 <audio preload="auto" v-if="l.playing" id="gg">
+										<source :src="prefix+l.content" type="audio/mpeg">
+									</audio>
+									<audio preload="auto">
+										<source :src="prefix+l.content" type="audio/mpeg">
+									</audio>
 								</div>
 							</div>
 						</div>
@@ -86,21 +96,21 @@
 			<!--</mt-loadmore>-->
 		</div>
 		<div class="wraperBox" v-show="recordIng">
-			<div style="text-align: center;" >
-				<img src="../images/record.png" style="width:3.3rem;margin-top:2rem"/>
+			<div style="text-align: center;">
+				<img src="../images/record.png" style="width:3.3rem;margin-top:2rem" />
 				<div style="color:#999;margin-top:1.5rem;font-size:1.2rem;">手指上滑，取消发送</div>
 			</div>
 		</div>
 		<div class="wraperBox" v-show="slideUp">
 			<div style="text-align: center;" v-show="slideUp">
-				<img src="../images/reset.png" style="width:3.3rem;margin-top:2rem"/>
+				<img src="../images/reset.png" style="width:3.3rem;margin-top:2rem" />
 				<div style="color:#999;margin-top:1.5rem;font-size:1.2rem;">手指上滑，取消发送</div>
 			</div>
 		</div>
 		<div class="tips">
 			<div style="margin-bottom:2rem;margin-left:2rem">
-				<img src="../images/audio.png" style="width:3rem;vertical-align: middle;"  @click="getRecord" v-show="!recordShow"/>
-				<img src="../images/keybord.png" style="width:3rem;vertical-align: middle;"  @click="getText" v-show="recordShow"/>
+				<img src="../images/audio.png" style="width:3rem;vertical-align: middle;" @click="getRecord" v-show="!recordShow" />
+				<img src="../images/keybord.png" style="width:3rem;vertical-align: middle;" @click="getText" v-show="recordShow" />
 				<div class="inputBtn" v-show="!recordShow">
 					<div contenteditable="true" class="tipsInput" @input="changeText" id="inputs" @focus="focusfns" ref="input">
 						<img :src='item' v-for="item in selectPicLists" style="width:20px;margin-right:5px;vertical-align: middle;" />
@@ -147,10 +157,10 @@
 		name: 'chat',
 		data() {
 			return {
-				recordIng:false,
-				slideUp:false,
-				voiceValue:'按住说话',
-				recordShow:false,
+				recordIng: false,
+				slideUp: false,
+				voiceValue: '按住说话',
+				recordShow: false,
 				bigImgShow: false,
 				defaultShow: true,
 				allLoaded: false,
@@ -389,28 +399,27 @@
 			this.initEvent()
 		},
 		methods: {
-			getRecord(){
+			getRecord() {
 				this.recordShow = true
 			},
-			getText(){
-				this.recordShow = false 
+			getText() {
+				this.recordShow = false
 			},
-			play(index){
-			let _this = this
-            this.chatLists.forEach(function(l) {
-              _this.$set(l, "playing", false);
-            });
-				var audio = document.querySelector('audio');
-				console.log(audio.duration)
-				  if (audio.paused) {
-			        // 开始播放当前点击的音频
-			        audio.play();
-			        this.chatLists[index].playing = true
-			    } else {
-			        audio.pause();
-			         this.chatLists[index].playing = false
-			    }
-			    console.log(this.chatLists)
+			play(index) {
+					let _this = this
+				this.chatLists.forEach(function(l) {
+					_this.$set(l, "playing", false);
+				});
+				this.chatLists[index].playing = true
+				this.$nextTick(() => {
+					var audio = document.getElementById('gg');
+					if(audio.paused) {
+						audio.play();
+					} else {
+						audio.pause()
+						this.chatLists[index].playing = false
+					}
+				})
 			},
 			save() {
 				//ajax
@@ -449,9 +458,9 @@
 					console.log("start");
 					console.log(posStart + '---------开始坐标');
 					_this.mouseStart()
-				 _this.timeOutEvent =setTimeout(function(){
-		         _this.recordIng = true
-		        },500);
+					_this.timeOutEvent = setTimeout(function() {
+						_this.recordIng = true
+					}, 500);
 				});
 				btnElem.addEventListener("touchmove", function(event) {
 					event.preventDefault(); //阻止浏览器默认行为
@@ -469,7 +478,7 @@
 				});
 				btnElem.addEventListener("touchend", function(event) {
 					_this.slideUp = false
-					 _this.recordIng = false
+					_this.recordIng = false
 					_this.timeEnd = new Date().getTime()
 					console.log('进来没有啊touchend')
 					event.preventDefault();
@@ -480,16 +489,16 @@
 					console.log(posEnd + '---------结束坐标');
 					if(posStart - posEnd < 200) {
 						console.log("发送成功");
-						if((_this.timeEnd - _this.timeStart) < 500){
-							 clearTimeout(_this.timeOutEvent);
-						}else if((_this.timeEnd - _this.timeStart) < 1000){
-//							Toast('录制时间太短')
- 							clearTimeout(_this.timeOutEvent);
-						}else{
+						if((_this.timeEnd - _this.timeStart) < 500) {
+							clearTimeout(_this.timeOutEvent);
+						} else if((_this.timeEnd - _this.timeStart) < 1000) {
+							//							Toast('录制时间太短')
+							clearTimeout(_this.timeOutEvent);
+						} else {
 							console.log(_this.timeEnd - _this.timeStart)
 							_this.save();
 						}
-						
+
 					} else {
 						console.log("取消发送");
 						console.log("Cancel");
@@ -541,7 +550,7 @@
 				r.onload = function() {
 					console.log(type)
 					console.log(s)
-					ws.send(new Blob([type,s]));
+					ws.send(new Blob([type, s]));
 				}
 			},
 			touchmove() { // 如果手指有移动，则取消所有事件，此时说明用户只是要移动而不是长按
@@ -738,38 +747,25 @@
 							headIcon: require('../images/wyz.jpg')
 						}
 						this.arr.push(obj)
-						if(this.chatLists && this.chatLists.length >0){
+						if(this.chatLists && this.chatLists.length > 0) {
 							this.arr = this.arr.concat(this.chatLists)
 						}
-				let len = this.arr.length-1;
-							if(len > 0) {
+						let len = this.arr.length - 1;
+						if(len > 0) {
 							console.log(this.arr)
 							console.log(this.arr[0].content)
 							console.log(this.arr[len].content)
 							if(new Date(this.arr[0].createTime).getTime() - new Date(this.arr[len].createTime).getTime() < 10000) {
-									console.log('尽力啊没有')
-									arrObj = {
-										direction: 2,
-										type: type,
-										content: res.content,
-										//content: 'https://cms-images.lovehaimi.com/images/resources/documentAudio/1538032236530.mp3',
-										headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
-										status: false,
-										error: false,
-										timer: false
-									}
-								} else {
-									arrObj = {
-										direction: 2,
-										type: type,
-										content: res.content,
-										//content: 'https://cms-images.lovehaimi.com/images/resources/documentAudio/1538032236530.mp3',
-										createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-										headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
-										status: false,
-										error: false,
-										timer: true
-									}
+								console.log('尽力啊没有')
+								arrObj = {
+									direction: 2,
+									type: type,
+									content: res.content,
+									//content: 'https://cms-images.lovehaimi.com/images/resources/documentAudio/1538032236530.mp3',
+									headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
+									status: false,
+									error: false,
+									timer: false
 								}
 							} else {
 								arrObj = {
@@ -784,19 +780,32 @@
 									timer: true
 								}
 							}
+						} else {
+							arrObj = {
+								direction: 2,
+								type: type,
+								content: res.content,
+								//content: 'https://cms-images.lovehaimi.com/images/resources/documentAudio/1538032236530.mp3',
+								createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+								headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
+								status: false,
+								error: false,
+								timer: true
+							}
+						}
 
 						this.chatLists.push(arrObj)
 					}
 					this.$nextTick(() => {
-					let msg = document.getElementById('content') // 获取对象
-					msg.scrollTop = msg.scrollHeight // 滚动高度
-				})
+						let msg = document.getElementById('content') // 获取对象
+						msg.scrollTop = msg.scrollHeight // 滚动高度
+					})
 					let resObj = {
 						content: obj.content,
 						//content: 'https://cms-images.lovehaimi.com/images/resources/documentAudio/1538032236530.mp3',
 						fromUserId: this.id,
-						toUserId: this.memberIdTo,
-						type: type
+						toUserId: this.memberIdTo
+						//						type: type
 					}
 					console.log(resObj)
 					let _this = this
@@ -901,10 +910,10 @@
 				let resObj = {
 					content: result,
 					fromUserId: this.id,
-					toUserId: this.memberIdTo,
-					type: 1
+					toUserId: this.memberIdTo
+					//					type: 1
 				}
-//				console.log(resObj)
+				//				console.log(resObj)
 				//调用后台handleTextMessage方法    
 				obj = {
 					direction: 2,
@@ -913,37 +922,25 @@
 					createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss")
 				}
 				this.arr.push(obj)
-				if(this.chatLists && this.chatLists.length >0){
+				if(this.chatLists && this.chatLists.length > 0) {
 					this.arr = this.arr.concat(this.chatLists)
 				}
 				//console.log(this.arr)
-				let len = this.arr.length-1;
-					if(len > 0) {
-						console.log(this.arr)
-						console.log(this.arr[0].content)
-						console.log(this.arr[len].content)
-						if(new Date(this.arr[0].createTime).getTime() - new Date(this.arr[len].createTime).getTime() > 10000) {
-							arrObj = {
-								direction: 2,
-								type: 1,
-								content: result,
-								headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
-								createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-								status: false,
-								error: false,
-								timer: true
-							}
-						} else {
-							arrObj = {
-								direction: 2,
-								type: 1,
-								content: result,
-								createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-								headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
-								status: false,
-								error: false,
-								timer: false
-							}
+				let len = this.arr.length - 1;
+				if(len > 0) {
+					console.log(this.arr)
+					console.log(this.arr[0].content)
+					console.log(this.arr[len].content)
+					if(new Date(this.arr[0].createTime).getTime() - new Date(this.arr[len].createTime).getTime() > 10000) {
+						arrObj = {
+							direction: 2,
+							type: 1,
+							content: result,
+							headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
+							createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+							status: false,
+							error: false,
+							timer: true
 						}
 					} else {
 						arrObj = {
@@ -954,9 +951,21 @@
 							headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 							status: false,
 							error: false,
-							timer: true
+							timer: false
 						}
 					}
+				} else {
+					arrObj = {
+						direction: 2,
+						type: 1,
+						content: result,
+						createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+						headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
+						status: false,
+						error: false,
+						timer: true
+					}
+				}
 				this.chatLists.push(arrObj)
 				this.$nextTick(() => {
 					let msg = document.getElementById('content') // 获取对象
@@ -965,14 +974,14 @@
 				console.log(this.toEmotion(result))
 				document.getElementById('inputs').innerHTML = ''
 				let _this = this
-					let length = _this.chatLists.length
-						_this.timemessage = setTimeout(function() {
-								Toast('执行没有')
-							if(!_this.chatLists[length - 1].status) {
-								_this.chatLists[length - 1].status = true
-								_this.chatLists[length - 1].error = true
-							}
-						}, 3000);
+				let length = _this.chatLists.length
+				_this.timemessage = setTimeout(function() {
+					Toast('执行没有')
+					if(!_this.chatLists[length - 1].status) {
+						_this.chatLists[length - 1].status = true
+						_this.chatLists[length - 1].error = true
+					}
+				}, 3000);
 				this.sendBtnShow = false
 				this.$refs.input.focus();
 				if(ws.readyState == ws.OPEN) {
@@ -1030,79 +1039,81 @@
 		width: 100%;
 		height: 100%;
 		.wifi-symbol {
-            width: 4rem;
-            height: 4rem;
-            box-sizing: border-box;
-            overflow: hidden;
-            transform: rotate(-45deg);
-            position: absolute;
-            right:2rem
-        }
-        .wifi-circle {
-            border: 2px solid #fff;
-            border-radius: 50%;
-            position: absolute;
-        }
-        .first {
-            width: 5px;
-            height: 5px;
-            background: #fff;
-            top: 37px;
-            left: 37px;
-        }
-        .second {
-            width: 20px;
-            height: 20px;
-            top: 30px;
-            left: 30px;
-            animation: fadeInOut 1s infinite 0.2s;
-        }
-        .third {
-            width: 25px;
-            height: 25px;
-            top: 25px;
-            left: 25px;
-            animation: fadeInOut 1s infinite 0.4s;
-        }
-  		.second1 {
-            width: 20px;
-            height: 20px;
-            top: 30px;
-            left: 30px;
-        }
-        .third1 {
-            width: 25px;
-            height: 25px;
-            top: 25px;
-            left: 25px;
-        }
-        @keyframes fadeInOut {
-            0% {
-                opacity: 0; /*初始状态 透明度为0*/
-            }
-            100% {
-                opacity: 1; /*结尾状态 透明度为1*/
-            }
-        }
-        .audioStylefriend{
-        	width:100px;
-			height:4rem;
-		    display: inline-block;
-		    position:relative;
-		 	 background: #FFF1F1;
-					color: #333;
-					margin-left: 1.5rem;
-					border-radius: 0px 5rem 5rem 2rem;
-        }
-		.audioStyle{
-			width:100px;
-			height:4rem;
-			 background: #FF9F9D;
-		    color: #fff;
-		    margin-right: 1.5rem;
-		    border-radius: 5rem 0 2rem 5rem;
-		    display: inline-block;
-		    position:relative;
+			width: 4rem;
+			height: 4rem;
+			box-sizing: border-box;
+			overflow: hidden;
+			transform: rotate(-45deg);
+			position: absolute;
+			right: 2rem
+		}
+		.wifi-circle {
+			border: 2px solid #fff;
+			border-radius: 50%;
+			position: absolute;
+		}
+		.first {
+			width: 5px;
+			height: 5px;
+			background: #fff;
+			top: 37px;
+			left: 37px;
+		}
+		.second {
+			width: 20px;
+			height: 20px;
+			top: 30px;
+			left: 30px;
+			animation: fadeInOut 1s infinite 0.2s;
+		}
+		.third {
+			width: 25px;
+			height: 25px;
+			top: 25px;
+			left: 25px;
+			animation: fadeInOut 1s infinite 0.4s;
+		}
+		.second1 {
+			width: 20px;
+			height: 20px;
+			top: 30px;
+			left: 30px;
+		}
+		.third1 {
+			width: 25px;
+			height: 25px;
+			top: 25px;
+			left: 25px;
+		}
+		@keyframes fadeInOut {
+			0% {
+				opacity: 0;
+				/*初始状态 透明度为0*/
+			}
+			100% {
+				opacity: 1;
+				/*结尾状态 透明度为1*/
+			}
+		}
+		.audioStylefriend {
+			width: 100px;
+			height: 4rem;
+			display: inline-block;
+			position: relative;
+			background: #FFF1F1;
+			color: #333;
+			margin-left: 1.5rem;
+			border-radius: 0px 5rem 5rem 2rem;
+		}
+		.audioStyle {
+			width: 100px;
+			height: 4rem;
+			background: #FF9F9D;
+			color: #fff;
+			margin-right: 1.5rem;
+			border-radius: 5rem 0 2rem 5rem;
+			display: inline-block;
+			position: relative;
 		}
 		.mint-spinner-snake {
 			border-width: 2px!important;
@@ -1240,17 +1251,17 @@
 				}
 			}
 		}
-		.wraperBox{
-			width:12.5rem;
-			height:12.5rem;
-			background:#fff;
-			box-shadow:0px 10px 20px 0px rgba(237,237,237,0.5);
-			border-radius:2rem;
-			position:fixed;
-			left:50%;
-			top:50%;
-			margin-top:-6.25rem;
-			margin-left:-6.25rem;
+		.wraperBox {
+			width: 12.5rem;
+			height: 12.5rem;
+			background: #fff;
+			box-shadow: 0px 10px 20px 0px rgba(237, 237, 237, 0.5);
+			border-radius: 2rem;
+			position: fixed;
+			left: 50%;
+			top: 50%;
+			margin-top: -6.25rem;
+			margin-left: -6.25rem;
 		}
 		.tips {
 			width: 100%;
@@ -1289,15 +1300,15 @@
 				.sendBtn {
 					float: right;
 				}
-				.touchDownStyle{
-					width:100%;
+				.touchDownStyle {
 					width: 100%;
-				    height: 4rem;
-				    background: #FF9F9D;
-				    color: #fff;
-				    border-radius: 2rem;
-				    outline: none;
-				    border: none;
+					width: 100%;
+					height: 4rem;
+					background: #FF9F9D;
+					color: #fff;
+					border-radius: 2rem;
+					outline: none;
+					border: none;
 				}
 			}
 		}
