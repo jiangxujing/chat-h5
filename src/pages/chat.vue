@@ -1,7 +1,7 @@
 <template>
 	<div class="chat" id="chat">
 		<div class="content" id="content" @touchmove="touchmoveDown()">
-		<!--	<mt-loadmore :top-method="loadTop" :bottom-all-loaded="allLoaded" ref="loadmore">-->
+			<!--	<mt-loadmore :top-method="loadTop" :bottom-all-loaded="allLoaded" ref="loadmore">-->
 			<div v-show="loadingShow" style="text-align: center;">
 				<img src="../images/loading.png" style="width:2rem;" />
 			</div>
@@ -42,64 +42,64 @@
 					<div v-if="l.type == 3">
 						<div class="friend" v-if="l.direction == 1">
 							<img :src="l.headIcon" class="touxiang" />
-							<div style="position: relative;display: inline-block;">
-									<div class="audioStylefriend" @click="play(l.content,index)" :style="{'width': (l.duration*5) + 'px'}" v-if="!l.playing">
+							<div class="friendStyle" style="position: relative;display: inline-block;">
+								<div class="audioStylefriend" @click="play(l.content,index)" :style="{'width': (l.duration*5) + 'px'}" v-if="!l.playing">
 									<div class="wifi-symbol" v-if="l.playing" style="transform: rotate(135deg); left: 2rem;">
-							            <div class="wifi-circle first"></div>
-							            <div class="wifi-circle second"></div>
-							            <div class="wifi-circle third"></div>
-							        </div>
-									 <div class="wifi-symbol" v-else style="transform: rotate(135deg); left: 2rem;">
-							            <div class="wifi-circle first"></div>
-							            <div class="wifi-circle second1"></div>
-							            <div class="wifi-circle third1"></div>
-							        </div>
-								 	<audio preload="auto" v-if="l.playing" id="gg">
+										<div class="wifi-circle first"></div>
+										<div class="wifi-circle second"></div>
+										<div class="wifi-circle third"></div>
+									</div>
+									<div class="wifi-symbol" v-else style="transform: rotate(135deg); left: 2rem;">
+										<div class="wifi-circle first"></div>
+										<div class="wifi-circle second1"></div>
+										<div class="wifi-circle third1"></div>
+									</div>
+									<audio preload="auto" v-if="l.playing" id="gg">
 										<source :src="prefix+l.content" type="audio/mpeg">
 									</audio>
 									<audio preload="auto">
 										<source :src="prefix+l.content" type="audio/mpeg">
 									</audio>
-							</div>
-							<div class="audioStylefriend" @click="pauseFun(l.content,index)" v-else :style="{'width': (l.duration*5) + 'px'}">
+								</div>
+								<div class="audioStylefriend" @click="pauseFun(l.content,index)" v-else :style="{'width': (l.duration*5) + 'px'}">
 									<div class="wifi-symbol" v-if="l.playing" style="transform: rotate(135deg); left: 2rem;">
-							            <div class="wifi-circle first"></div>
-							            <div class="wifi-circle second"></div>
-							            <div class="wifi-circle third"></div>
-							        </div>
-									 <div class="wifi-symbol" v-else style="transform: rotate(135deg); left: 2rem;">
-							            <div class="wifi-circle first"></div>
-							            <div class="wifi-circle second1"></div>
-							            <div class="wifi-circle third1"></div>
-							        </div>
-								 	<audio preload="auto" v-if="l.playing" id="gg">
+										<div class="wifi-circle first"></div>
+										<div class="wifi-circle second"></div>
+										<div class="wifi-circle third"></div>
+									</div>
+									<div class="wifi-symbol" v-else style="transform: rotate(135deg); left: 2rem;">
+										<div class="wifi-circle first"></div>
+										<div class="wifi-circle second1"></div>
+										<div class="wifi-circle third1"></div>
+									</div>
+									<audio preload="auto" v-if="l.playing" id="gg">
 										<source :src="prefix+l.content" type="audio/mpeg">
 									</audio>
 									<audio preload="auto">
 										<source :src="prefix+l.content" type="audio/mpeg">
 									</audio>
-							</div>
-							 <span class="durationFriend">{{l.duration}}″</span>
+								</div>
+								<span class="durationFriend">{{l.duration}}″</span>
 							</div>
 						</div>
 						<div class="myself" v-if="l.direction == 2">
 							<img :src="l.headIcon" class="touxiang" />
 							<div class="loadingStyle">
 								<mt-spinner type="snake" :size="10" class="spinner" v-if="!l.status"></mt-spinner>
-								<img src="../images/error.png" v-if="l.error" style="width:1.6rem ;float: left;vertical-align: middle; margin-top: 15px;" />
-								  <span class="duration">{{l.duration}}″</span>
+								<img src="../images/error.png" v-if="l.error" style="width:1.6rem ;float: left;margin-right:1rem;vertical-align: middle; margin-top: 15px;" />
+								<span class="duration">{{l.duration}}″</span>
 								<div class="audioStyle" @click="play(l.content,index)" v-if="!l.playing" :style="{'width': (l.duration*5) + 'px'}">
-									 <div class="wifi-symbol" v-if="l.playing">
-							            <div class="wifi-circle first"></div>
-							            <div class="wifi-circle second"></div>
-							            <div class="wifi-circle third"></div>
-							        </div>
-									 <div class="wifi-symbol" v-else>
-							            <div class="wifi-circle first"></div>
-							            <div class="wifi-circle second1"></div>
-							            <div class="wifi-circle third1"></div>
-							        </div>
-									 <audio preload="auto" v-if="l.playing" id="gg">
+									<div class="wifi-symbol" v-if="l.playing">
+										<div class="wifi-circle first"></div>
+										<div class="wifi-circle second"></div>
+										<div class="wifi-circle third"></div>
+									</div>
+									<div class="wifi-symbol" v-else>
+										<div class="wifi-circle first"></div>
+										<div class="wifi-circle second1"></div>
+										<div class="wifi-circle third1"></div>
+									</div>
+									<audio preload="auto" v-if="l.playing" id="gg">
 										<source :src="prefix+l.content" type="audio/mpeg">
 									</audio>
 									<audio preload="auto">
@@ -107,17 +107,17 @@
 									</audio>
 								</div>
 								<div class="audioStyle" @click="pauseFun(l.content,index)" v-else :style="{'width': (l.duration*5) + 'px'}">
-									 <div class="wifi-symbol" v-if="l.playing">
-							            <div class="wifi-circle first"></div>
-							            <div class="wifi-circle second"></div>
-							            <div class="wifi-circle third"></div>
-							        </div>
-									 <div class="wifi-symbol" v-else>
-							            <div class="wifi-circle first"></div>
-							            <div class="wifi-circle second1"></div>
-							            <div class="wifi-circle third1"></div>
-							        </div>
-									 <audio preload="auto" v-if="l.playing" id="gg">
+									<div class="wifi-symbol" v-if="l.playing">
+										<div class="wifi-circle first"></div>
+										<div class="wifi-circle second"></div>
+										<div class="wifi-circle third"></div>
+									</div>
+									<div class="wifi-symbol" v-else>
+										<div class="wifi-circle first"></div>
+										<div class="wifi-circle second1"></div>
+										<div class="wifi-circle third1"></div>
+									</div>
+									<audio preload="auto" v-if="l.playing" id="gg">
 										<source :src="prefix+l.content">
 									</audio>
 									<audio preload="auto">
@@ -445,35 +445,34 @@
 			getText() {
 				this.recordShow = false
 			},
-			pauseFun(data,index){
-				 this.audio.pause();
-				 this.chatLists[index].playing = false
-				  clearInterval(this.tiemr);
+			pauseFun(data, index) {
+				this.audio.pause();
+				this.chatLists[index].playing = false
+				clearInterval(this.tiemr);
 			},
-			play(data,index) {
+			play(data, index) {
 				let _this = this
 				this.chatLists.forEach(function(l) {
 					_this.$set(l, "playing", false);
 				});
 				this.audio = new Audio();
-				this.audio.src = this.prefix+data;
-				let playPromise; 
+				this.audio.src = this.prefix + data;
+				let playPromise;
 				let second = 5
 				playPromise = this.audio.play();
-				if (playPromise) {
+				if(playPromise) {
 					this.chatLists[index].playing = true
-				        playPromise.then(() => {
-				        _this.tiemr = setTimeout(() => {
-                    }, _this.audio.duration * 1000); // audio.duration 为音频的时长单位为秒
-					_this.audio.addEventListener('ended', function () {  
-						console.log('播放完毕')
-					    _this.chatLists[index].playing = false
-					}, false);
-				        }).catch((e) => {
-				        	 _this.audio.load();
-				          console.error(e);
-				        });
-				      }
+					playPromise.then(() => {
+						_this.tiemr = setTimeout(() => {}, _this.audio.duration * 1000); // audio.duration 为音频的时长单位为秒
+						_this.audio.addEventListener('ended', function() {
+							console.log('播放完毕')
+							_this.chatLists[index].playing = false
+						}, false);
+					}).catch((e) => {
+						_this.audio.load();
+						console.error(e);
+					});
+				}
 			},
 			save() {
 				//ajax
@@ -550,7 +549,7 @@
 							clearTimeout(_this.timeOutEvent);
 						} else {
 							console.log()
-							_this.duration = (_this.timeEnd - _this.timeStart)/1000
+							_this.duration = parseInt((_this.timeEnd - _this.timeStart) / 1000)
 							_this.save();
 						}
 
@@ -669,7 +668,7 @@
 							// 变量scrollHeight是滚动条的总高度
 							let scrollHeight = document.documentElement.clientHeight || document.body.scrollHeight
 							//msg.scrollTop = innerHeight + scrollHeight + scrollTop+500
-							msg.scrollTop =scrollHeight+scrollTop
+							msg.scrollTop = scrollHeight + scrollTop
 						})
 					}
 				})
@@ -680,7 +679,7 @@
 				ws.onmessage = (evnt) => {
 					let content = evnt.data;
 					_this.onmessage = true
-					console.log('contentcontentcontentcontentcontentcontentcontent' + typeof(content)+content)
+					console.log('contentcontentcontentcontentcontentcontentcontent' + typeof(content) + content)
 					if(typeof(content) == 'string') {
 						if(JSON.parse(content).status == 1) {
 							//console.log('成功了')
@@ -820,7 +819,7 @@
 									status: false,
 									error: false,
 									timer: false,
-									duration:this.duration
+									duration: this.duration
 								}
 							} else {
 								arrObj = {
@@ -832,7 +831,7 @@
 									status: false,
 									error: false,
 									timer: true,
-									duration:this.duration
+									duration: this.duration
 								}
 							}
 						} else {
@@ -845,7 +844,7 @@
 								status: false,
 								error: false,
 								timer: true,
-								duration:this.duration
+								duration: this.duration
 							}
 						}
 
@@ -1101,11 +1100,6 @@
 			position: absolute;
 			right: 2rem
 		}
-		.wifi-circle {
-			border: 2px solid #fff;
-			border-radius: 50%;
-			position: absolute;
-		}
 		.first {
 			width: 5px;
 			height: 5px;
@@ -1151,7 +1145,7 @@
 		}
 		.audioStylefriend {
 			/*width: 100px;*/
-			min-width:4rem;
+			min-width: 4rem;
 			height: 4rem;
 			display: inline-block;
 			position: relative;
@@ -1159,10 +1153,15 @@
 			color: #333;
 			margin-left: 1.5rem;
 			border-radius: 0px 5rem 5rem 2rem;
+			.wifi-circle {
+				border: 2px solid #FF9F9D;
+				border-radius: 50%;
+				position: absolute;
+			}
 		}
 		.audioStyle {
 			/*width: 100px;*/
-			min-width:4rem;
+			min-width: 4rem;
 			height: 4rem;
 			background: #FF9F9D;
 			color: #fff;
@@ -1170,19 +1169,26 @@
 			border-radius: 5rem 0 2rem 5rem;
 			display: inline-block;
 			position: relative;
-		}
-		.durationFriend{
-			color:#FF9F9D;
-				float: right;
-			    margin-top: 1.5rem;
-			    margin-left:1rem;
-		}
-		.duration{
-				color:#FF9F9D;
-				float: left;
-			    margin-top: 1.5rem;
-			    margin-right:1rem;
+			.wifi-circle {
+				border: 2px solid #fff;
+				border-radius: 50%;
+				position: absolute;
 			}
+		}
+		.durationFriend {
+			color: #FF9F9D;
+			float: right;
+			margin-top: 1.5rem;
+			margin-left: 1rem;
+			font-size: 1.3rem
+		}
+		.duration {
+			color: #FF9F9D;
+			float: left;
+			margin-top: 1.5rem;
+			margin-right: 1rem;
+			font-size: 1.3rem
+		}
 		.mint-spinner-snake {
 			border-width: 2px!important;
 		}
