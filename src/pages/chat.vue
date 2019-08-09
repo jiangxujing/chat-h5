@@ -1100,13 +1100,7 @@
 			position: absolute;
 			right: 2rem
 		}
-		.first {
-			width: 5px;
-			height: 5px;
-			background: #fff;
-			top: 37px;
-			left: 37px;
-		}
+		
 		.second {
 			width: 20px;
 			height: 20px;
@@ -1158,6 +1152,13 @@
 				border-radius: 50%;
 				position: absolute;
 			}
+			.first {
+			width: 5px;
+			height: 5px;
+			background: #FF9F9D;
+			top: 37px;
+			left: 37px;
+		}
 		}
 		.audioStyle {
 			/*width: 100px;*/
@@ -1174,6 +1175,13 @@
 				border-radius: 50%;
 				position: absolute;
 			}
+			.first {
+			width: 5px;
+			height: 5px;
+			background: #fff;
+			top: 37px;
+			left: 37px;
+		}
 		}
 		.durationFriend {
 			color: #FF9F9D;
@@ -1195,7 +1203,7 @@
 		/*padding: 2rem;*/
 		box-sizing: border-box;
 		.content {
-			height: 90%;
+			height: 80%;
 			/*height:calc(100%-100px);*/
 			overflow-y: scroll;
 			padding: 2rem;
@@ -1354,7 +1362,7 @@
 			.inputBtn {
 				position: relative;
 				display: inline-block;
-				width: 60%;
+				width: 55%;
 				margin-top: 5px;
 				vertical-align: middle;
 				.tipsInput {

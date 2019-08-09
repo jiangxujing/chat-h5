@@ -209,7 +209,7 @@ const post = (url, data) => {
  * 上传(不需要对数据做过滤处理)
  **/
 const upload = (url, data) => {
-    let token = localStorage.getItem('token')
+    let token = sessionStorage.getItem('token')
     const sec = 6000
     // 清除loading 动画
     let closeLoading = function() {
