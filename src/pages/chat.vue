@@ -473,7 +473,14 @@
 						console.error(e);
 					});
 				}
+//				this.audio.ontimeupdate = function() {
+//					_this.myFunction()
+//					};
 			},
+//			 myFunction() {
+//				// 显示 id="demo" 的 <p> 元素中视频的播放位置 
+//				   console.log(this.audio.currentTime);
+//				},
 			save() {
 				//ajax
 				this.clearTimer()
