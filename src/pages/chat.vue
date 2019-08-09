@@ -159,9 +159,9 @@
 				<div class="inputBtn" v-show="recordShow">
 					<el-button id="messageBtn" class="touchDownStyle">{{voiceValue}}</el-button>
 				</div>
-				<img src="../images/biaoqing.png" class="photo" @click="openExpression" style="margin-left:1.5rem" />
-				<img src="../images/add.png" class="expression" @click="openGallery" style="margin-left:1.5rem" v-if="!sendBtnShow" />
-				<img src="../images/send.png" class="sendBtn" @click="sendBtn" style="margin-left:1.5rem" v-if="sendBtnShow" />
+				<img src="../images/send.png" class="sendBtn" @click="sendBtn" v-if="sendBtnShow" />
+				<img src="../images/add.png" class="expression" @click="openGallery" v-if="!sendBtnShow" />
+				<img src="../images/biaoqing.png" class="photo" @click="openExpression"/>
 			</div>
 			<div v-if="expressionShow" style="width:100%;margin:0 auto;background: #F9F9F9;height:15rem;overflow-x:scroll;padding: 0 0 1rem 0;">
 				<div class="expressionList">
@@ -1104,28 +1104,28 @@
 		.second {
 			width: 20px;
 			height: 20px;
-			top: 30px;
-			left: 30px;
+			top: 3rem;
+			left: 3rem;
 			animation: fadeInOut 1s infinite 0.2s;
 		}
 		.third {
 			width: 25px;
 			height: 25px;
-			top: 25px;
-			left: 25px;
+			top: 2.5rem;
+			left: 2.5rem;
 			animation: fadeInOut 1s infinite 0.4s;
 		}
 		.second1 {
 			width: 20px;
 			height: 20px;
-			top: 30px;
-			left: 30px;
+			top: 3rem;
+			left: 3rem;
 		}
 		.third1 {
 			width: 25px;
 			height: 25px;
-			top: 25px;
-			left: 25px;
+			top: 2.5rem;
+			left: 2.5rem;
 		}
 		@keyframes fadeInOut {
 			0% {
@@ -1156,8 +1156,8 @@
 			width: 5px;
 			height: 5px;
 			background: #FF9F9D;
-			top: 37px;
-			left: 37px;
+			top: 3.7rem;
+			left: 3.7rem;
 		}
 		}
 		.audioStyle {
@@ -1179,8 +1179,8 @@
 			width: 5px;
 			height: 5px;
 			background: #fff;
-			top: 37px;
-			left: 37px;
+			top: 3.7rem;
+			left: 3.7rem;
 		}
 		}
 		.durationFriend {
@@ -1355,9 +1355,19 @@
 			.sendBtn {
 				width: 3rem;
 				vertical-align: middle;
+				    float: right;
+    margin-right: 2rem;
+    margin-top: 1rem;
+			}
+			.photo{
+				margin-top:0.9rem;
+				float: right;
+                margin-right: 1.5rem;
 			}
 			.expression {
-				margin-left: 10px;
+			    float: right;
+				margin-right: 2rem;
+				margin-top:0.9rem;
 			}
 			.inputBtn {
 				position: relative;
@@ -1378,6 +1388,7 @@
 					padding-top: 1rem;
 					box-sizing: border-box;
 					padding-bottom: 1rem;
+					margin-left:1.5rem;
 				}
 				.sendBtn {
 					float: right;
@@ -1391,6 +1402,7 @@
 					border-radius: 2rem;
 					outline: none;
 					border: none;
+					margin-left:1.5rem;
 				}
 			}
 		}
