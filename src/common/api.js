@@ -125,8 +125,8 @@ const postExcel = (url, data) => {
 
 // 一般请求
 const post = (url, data) => {
-    // let token = '0A159ECFDF148BBC6CF999929D8B2C24'
-    let token = localStorage.getItem('token')
+    //let token = '0A159ECFDF148BBC6CF999929D8B2C24'
+    let token = sessionStorage.getItem('token')
     const sec = 6000
     let postData = {}
 

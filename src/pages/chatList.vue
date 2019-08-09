@@ -69,6 +69,8 @@
 			}
 		},
 		mounted() {
+			let token =  this.$route.query.token
+			sessionStorage.setItem('token',token)
 			this.getChatList()
 		},
 	}
