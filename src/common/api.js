@@ -311,7 +311,46 @@ const get = (url) =>{
       }
     })
 }
-
+// 注册 app 交互方法
+const setupWebViewJavascriptBridge = (callback) => {
+	let toolType = sessionStorage.getItem('toolType')
+    if (toolType === '5') {
+        if (window.WebViewJavascriptBridge) {
+            return callback(WebViewJavascriptBridge)
+        }
+        if (window.WVJBCallbacks) {
+            return window.WVJBCallbacks.push(callback)
+        }
+        window.WVJBCallbacks = [callback]
+        let WVJBIframe = document.createElement('iframe')
+        WVJBIframe.style.display = 'none'
+        WVJBIframe.src = 'https://__bridge_loaded__'
+        document.documentElement.appendChild(WVJBIframe)
+        setTimeout(function() {
+            document.documentElement.removeChild(WVJBIframe)
+        }, 0)
+    } else if (toolType === '4') {
+        if (window.WebViewJavascriptBridge) {
+            callback(WebViewJavascriptBridge)
+        } else {
+            document.addEventListener( 'WebViewJavascriptBridgeReady' , function() {
+                callback(WebViewJavascriptBridge)
+            }, false )
+        }
+        if (window.WVJBCallbacks) {
+            return window.WVJBCallbacks.push(callback)
+        }
+        window.WVJBCallbacks = [callback]
+        let WVJBIframe = document.createElement('iframe')
+        WVJBIframe.style.display = 'none'
+        WVJBIframe.src = 'https://__bridge_loaded__'
+        document.documentElement.appendChild(WVJBIframe)
+        setTimeout(function() {
+            document.documentElement.removeChild(WVJBIframe)
+        }, 0)
+    } else {
+    }
+}
 
 // 返回在vue模板中的调用接口
 export default {
@@ -333,6 +372,7 @@ export default {
     post,
     upload,
     get,
+    setupWebViewJavascriptBridge,
     cancel: () => {
         cancel && cancel()
     }

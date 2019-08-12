@@ -79,7 +79,7 @@
 										<source :src="prefix+l.content" type="audio/mpeg">
 									</audio>
 								</div>
-								<span class="durationFriend">{{l.duration}}″</span>
+								<span class="durationFriend">{{l.audioTime}}″</span>
 							</div>
 						</div>
 						<div class="myself" v-if="l.direction == 2">
@@ -87,7 +87,7 @@
 							<div class="loadingStyle">
 								<mt-spinner type="snake" :size="10" class="spinner" v-if="!l.status"></mt-spinner>
 								<img src="../images/error.png" v-if="l.error" style="width:1.6rem ;float: left;margin-right:1rem;vertical-align: middle; margin-top: 15px;" />
-								<span class="duration">{{l.duration}}″</span>
+								<span class="duration">{{l.audioTime}}″</span>
 								<div class="audioStyle" @click="play(l.content,index)" v-if="!l.playing" :style="{'width': (l.duration*5) + 'px'}">
 									<div class="wifi-symbol" v-if="l.playing">
 										<div class="wifi-circle first"></div>
@@ -451,6 +451,7 @@
 				clearInterval(this.tiemr);
 			},
 			play(data, index) {
+				console.log(data)
 				let _this = this
 				this.chatLists.forEach(function(l) {
 					_this.$set(l, "playing", false);
@@ -483,7 +484,7 @@
 					this.recorder.stop()
 					// 重置说话时间
 					this.num = 60
-					this.time = '按住说话（' + this.num + '秒）'
+					this.voiceValue = '按住说话（' + this.num + '秒）'
 					// 获取语音二进制文件
 					let bold = this.recorder.getBlob()
 					// 将获取的二进制对象转为二进制文件流
@@ -503,6 +504,7 @@
 				var btnElem = document.getElementById("messageBtn"); //获取ID
 				btnElem.addEventListener("touchstart", function(event) {
 					_this.timeStart = new Date().getTime()
+					_this.num = 10
 					console.log('进来没有啊touchstart')
 					event.preventDefault(); //阻止浏览器默认行为
 					posStart = 0;
@@ -519,7 +521,7 @@
 					event.preventDefault(); //阻止浏览器默认行为
 					posMove = 0;
 					posMove = event.targetTouches[0].pageY; //获取滑动实时坐标
-					if(posStart - posMove < 500) {
+					if(posStart - posMove < 300) {
 						_this.voiceValue = '松开 结束';
 						_this.recordIng = true
 						_this.slideUp = false
@@ -530,6 +532,8 @@
 					}
 				});
 				btnElem.addEventListener("touchend", function(event) {
+					console.log('gggggggggggg')
+					_this.clearTimer()
 					_this.slideUp = false
 					_this.recordIng = false
 					_this.timeEnd = new Date().getTime()
@@ -540,19 +544,18 @@
 					_this.voiceValue = '按住 说话';
 					console.log("End");
 					console.log(posEnd + '---------结束坐标');
-					if(posStart - posEnd < 200) {
+					if(posStart - posEnd < 300) {
 						console.log("发送成功");
 						if((_this.timeEnd - _this.timeStart) < 500) {
+							//只是点击一下就松开了
 							clearTimeout(_this.timeOutEvent);
 						} else if((_this.timeEnd - _this.timeStart) < 1000) {
-							//							Toast('录制时间太短')
+							//Toast('录制时间太短')
 							clearTimeout(_this.timeOutEvent);
-						} else {
-							console.log()
+						}else {
 							_this.duration = parseInt((_this.timeEnd - _this.timeStart) / 1000)
 							_this.save();
 						}
-
 					} else {
 						console.log("取消发送");
 						console.log("Cancel");
@@ -562,7 +565,7 @@
 			// 清除定时器
 			clearTimer() {
 				if(this.interval) {
-					this.num = 60
+					this.num =10
 					clearInterval(this.interval)
 				}
 			},
@@ -570,6 +573,7 @@
 			mouseStart() {
 				this.clearTimer()
 				this.startTime = new Date().getTime()
+				let _this = this
 				recording.get((rec) => {
 					// 当首次按下时，要获取浏览器的麦克风权限，所以这时要做一个判断处理
 					if(rec) {
@@ -580,12 +584,14 @@
 						} else {
 							this.recorder = rec
 							this.interval = setInterval(() => {
-								if(this.num <= 0) {
-									this.recorder.stop()
-									this.num = 60
-									this.clearTimer()
+								if(_this.num <= 0) {
+									_this.recorder.stop()
+									_this.num = 60
+									_this.clearTimer()
 								} else {
-									this.recorder.start()
+									 this.num--
+                					_this.voiceValue = '松开结束（' + _this.num + '秒）'
+									_this.recorder.start()
 								}
 							}, 1000)
 						}
@@ -649,9 +655,9 @@
 							}
 						}
 						this.chatLists = res.content.concat(this.chatLists);
-						this.chatLists.forEach(function(l) {
-							_this.$set(l, "duration", '16');
-						});
+//						this.chatLists.forEach(function(l) {
+//							_this.$set(l, "duration", '16');
+//						});
 						console.log(this.chatLists)
 						this.loadingShow = false
 						this.move = true
@@ -701,6 +707,7 @@
 						reader.onload = function(evnt) {
 							str = reader.result; //内容就在这里
 							var f = JSON.parse(str.substring(1))
+							console.log(f)
 							//console.log(str)
 							obj = {
 								direction: 1,
@@ -718,6 +725,7 @@
 											type: str.substring(0, 1),
 											content: f.content,
 											headIcon: require('../images/wyz.jpg'),
+											audioTime:f.audioTime,
 											timer: false
 										}
 									} else {
@@ -726,6 +734,7 @@
 											type: str.substring(0, 1),
 											content: f.content,
 											createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
+											audioTime:f.audioTime,
 											headIcon: require('../images/wyz.jpg'),
 											timer: true
 										}
@@ -737,6 +746,7 @@
 										content: f.content,
 										createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 										headIcon: require('../images/wyz.jpg'),
+										audioTime:f.audioTime,
 										timer: true
 									}
 								}
@@ -792,6 +802,7 @@
 					let obj = {}
 					let arrObj = {}
 					if(res.code == '0000') {
+						console.log(res.content.audioTime)
 						this.galleryShow = false
 						obj = {
 							direction: 2,
@@ -814,52 +825,53 @@
 								arrObj = {
 									direction: 2,
 									type: type,
-									content: res.content,
+									content: res.content.fileName,
 									headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 									status: false,
 									error: false,
 									timer: false,
-									duration: this.duration
+									audioTime: res.content.audioTime
 								}
 							} else {
 								arrObj = {
 									direction: 2,
 									type: type,
-									content: res.content,
+									content: res.content.fileName,
 									createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 									headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 									status: false,
 									error: false,
 									timer: true,
-									duration: this.duration
+									audioTime: res.content.audioTime
 								}
 							}
 						} else {
 							arrObj = {
 								direction: 2,
 								type: type,
-								content: res.content,
+								content: res.content.fileName,
 								createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 								headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
 								status: false,
 								error: false,
 								timer: true,
-								duration: this.duration
+								audioTime: res.content.audioTime
 							}
 						}
 
 						this.chatLists.push(arrObj)
+						console.log(this.chatLists)
 					}
 					this.$nextTick(() => {
 						let msg = document.getElementById('content') // 获取对象
 						msg.scrollTop = msg.scrollHeight // 滚动高度
 					})
 					let resObj = {
-						content: obj.content,
+						content: obj.content.fileName,
+						audioTime:obj.content.audioTime,
 						fromUserId: this.id,
 						toUserId: this.memberIdTo
-						//						type: type
-					}
+  					}
 					console.log(resObj)
 					let _this = this
 					let length = this.chatLists.length
@@ -1029,7 +1041,6 @@
 				let _this = this
 				let length = _this.chatLists.length
 				_this.timemessage = setTimeout(function() {
-					Toast('执行没有')
 					if(!_this.chatLists[length - 1].status) {
 						_this.chatLists[length - 1].status = true
 						_this.chatLists[length - 1].error = true
@@ -1186,7 +1197,7 @@
 		.durationFriend {
 			color: #FF9F9D;
 			float: right;
-			margin-top: 1.5rem;
+			margin-top: 1.2rem;
 			margin-left: 1rem;
 			font-size: 1.3rem
 		}

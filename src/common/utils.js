@@ -750,16 +750,30 @@ export const formatMoney = (row, column) => {
 export const getWebsocketURL = () =>{
   var websocketurl = ''
   let hostname = window.location.host
- 	if(hostname == 'localhost:8081'){
+ 	if(hostname == 'localhost:8087'){
   	websocketurl = 'ws://99.48.68.111:8092'
   }else if(hostname == '99.48.68.95'){
   	websocketurl = 'ws://99.48.68.111:8092'
   }else if(hostname == '99.48.68.109:92'){
     websocketurl = 'ws://99.48.68.111:8092'
   }else{
-  	 websocketurl = 'wss://customer.lovehaimi.com'
+  	 websocketurl = 'ws://99.48.68.111:8092'
   }
   return websocketurl
+}
+export const getBrowserURL = () =>{
+  var browserUrl = ''
+  let hostname = window.location.host
+ 	if(hostname == 'localhost:8087'){
+  	browserUrl = 'http://99.48.68.95:8082'
+  }else if(hostname == '99.48.68.95'){
+  	browserUrl = 'http://99.48.68.95:8082'
+  }else if(hostname == '99.48.66.107:92'){
+    browserUrl = 'http://99.48.68.95:8082'
+  }else{
+  	 browserUrl = 'http://99.48.68.95:8082'
+  }
+  return browserUrl
 }
 export const toEmotion =(text) => {
 		var list = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10','11', '12', '13', '14', '15', '16', '17', '18', '19', '20','21', 
@@ -819,6 +833,7 @@ export default {
 	getReturnStatusVal,
 	formatMoney,
 	getWebsocketURL,
+	getBrowserURL,
 	toEmotion,
 	formatTime
 }

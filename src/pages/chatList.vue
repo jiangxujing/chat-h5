@@ -2,7 +2,7 @@
 	<div class="chatList">
 		<div  style="height:100%;overflow-y:scroll;">
 			<mt-loadmore :top-method="loadTop" :autoFill="false" :bottom-method="loadBottom" :bottom-all-loaded="allLoaded" ref="loadmore">
-			<div class="chat-main" v-for="(i,index) in chatLists" @click="openChat(i.id,i.memberIdTo)" :key="index">
+			<div class="chat-main" v-for="(i,index) in chatLists" @click="openChat(i.nickName,i.id,i.memberIdTo)" :key="index">
 				<div style="flex:1">
 					<img :src="i.headIcon" class="touxiang" />
 					<div class="info">
@@ -64,13 +64,24 @@
 					}
 				})
 			},
-			openChat(id,memberIdTo) {
+			openChat(name,id,memberIdTo) {
+					api.setupWebViewJavascriptBridge(function(bridge) {
+						let params = {
+							jumpUrl: _utils.getBrowserURL+"/chat?id=" + id+'&memberIdTo='+memberIdTo,
+							nickName:name
+						}
+						bridge.callHandler('openChat', params, (data) => {
+							console.log(data)
+						})
+					})
 				this.$router.push("/chat?id=" + id+'&memberIdTo='+memberIdTo)
 			}
 		},
 		mounted() {
 			let token =  this.$route.query.token
+			let toolType = this.$route.query.toolType
 			sessionStorage.setItem('token',token)
+			sessionStorage.setItem('toolType',toolType)
 			this.getChatList()
 		},
 	}
