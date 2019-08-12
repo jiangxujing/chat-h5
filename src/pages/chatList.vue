@@ -82,6 +82,7 @@
 			let toolType = this.$route.query.toolType
 			sessionStorage.setItem('token',token)
 			sessionStorage.setItem('toolType',toolType)
+			let toolType = this.$route.query.toolType
 			this.getChatList()
 		},
 	}
