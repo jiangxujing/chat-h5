@@ -791,7 +791,7 @@ export const toEmotion =(text) => {
 			if(index <=0 ) {
 				return word;
 			}else{
-				var path = 'http://99.48.68.109:92';
+				var path = 'http://99.48.66.107:92';
 				imgHTML = `<img class="static-emotion-gif" style="vertical-align: middle;width:20px;margin-top: -4px;" src="${path}/emotion/${index}.png">`
 				return imgHTML;
 			}

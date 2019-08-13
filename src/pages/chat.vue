@@ -10,7 +10,7 @@
 				<div class="chatStyle">
 					<div v-if="l.type == 0 || l.type == 1">
 						<div class="friend" v-if="l.direction == 1">
-							<img :src="l.headIcon" class="touxiang" />
+							<img :src="prefix+l.headIcon" class="touxiang" />
 							<div v-html="$utils.toEmotion(l.content)" class="xiaoxi"></div>
 						</div>
 						<div class="myself" v-if="l.direction == 2">
@@ -19,16 +19,16 @@
 								<img src="../images/error.png" v-if="l.error" style="width:1.6rem" />
 								<div class="xiaoxi" v-html="$utils.toEmotion(l.content)"></div>
 							</div>
-							<img :src="l.headIcon" class="touxiang" />
+							<img :src="prefix+l.headIcon" class="touxiang" />
 						</div>
 					</div>
 					<div v-if="l.type == 2">
 						<div class="friend" v-if="l.direction == 1">
-							<img :src="l.headIcon" class="touxiang" />
+							<img :src="prefix+l.headIcon" class="touxiang" />
 							<img :src="prefix+l.content" style="width:100px;margin-left:2rem" @click="openImg">
 						</div>
 						<div class="myself" v-if="l.direction == 2">
-							<img :src="l.headIcon" class="touxiang" />
+							<img :src="prefix+l.headIcon" class="touxiang" />
 							<div class="loadingStyle">
 								<mt-spinner type="snake" :size="10" class="spinner" v-if="!l.status"></mt-spinner>
 								<img src="../images/error.png" v-if="l.error" style="width:1.6rem" />
@@ -41,7 +41,7 @@
 					</div>
 					<div v-if="l.type == 3">
 						<div class="friend" v-if="l.direction == 1">
-							<img :src="l.headIcon" class="touxiang" />
+							<img :src="prefix+l.headIcon" class="touxiang" />
 							<div class="friendStyle" style="position: relative;display: inline-block;">
 								<div class="audioStylefriend" @click="play(l.content,index)" :style="{'width': (l.duration*5) + 'px'}" v-if="!l.playing">
 									<div class="wifi-symbol" v-if="l.playing" style="transform: rotate(135deg); left: 2rem;">
@@ -83,7 +83,7 @@
 							</div>
 						</div>
 						<div class="myself" v-if="l.direction == 2">
-							<img :src="l.headIcon" class="touxiang" />
+							<img :src="prefix+l.headIcon" class="touxiang" />
 							<div class="loadingStyle">
 								<mt-spinner type="snake" :size="10" class="spinner" v-if="!l.status"></mt-spinner>
 								<img src="../images/error.png" v-if="l.error" style="width:1.6rem ;float: left;margin-right:1rem;vertical-align: middle; margin-top: 15px;" />
@@ -451,7 +451,6 @@
 				clearInterval(this.tiemr);
 			},
 			play(data, index) {
-				console.log(data)
 				let _this = this
 				this.chatLists.forEach(function(l) {
 					_this.$set(l, "playing", false);
@@ -474,14 +473,7 @@
 						console.error(e);
 					});
 				}
-//				this.audio.ontimeupdate = function() {
-//					_this.myFunction()
-//					};
 			},
-//			 myFunction() {
-//				// 显示 id="demo" 的 <p> 元素中视频的播放位置 
-//				   console.log(this.audio.currentTime);
-//				},
 			save() {
 				//ajax
 				this.clearTimer()
@@ -501,8 +493,6 @@
 					})
 					let fd = new FormData()
 					fd.append('file', files)
-					//      fd.append('tenantId', 3) // 额外参数，可根据选择填写
-					// 这里是通过上传语音文件的接口，获取接口返回的路径作为语音路径
 					this.sendPic(fd, 3)
 				}
 			},
@@ -512,7 +502,6 @@
 				btnElem.addEventListener("touchstart", function(event) {
 					_this.timeStart = new Date().getTime()
 					_this.num = 10
-					console.log('进来没有啊touchstart')
 					event.preventDefault(); //阻止浏览器默认行为
 					posStart = 0;
 					posStart = event.touches[0].pageY; //获取起点坐标
@@ -539,12 +528,10 @@
 					}
 				});
 				btnElem.addEventListener("touchend", function(event) {
-					console.log('gggggggggggg')
 					_this.clearTimer()
 					_this.slideUp = false
 					_this.recordIng = false
 					_this.timeEnd = new Date().getTime()
-					console.log('进来没有啊touchend')
 					event.preventDefault();
 					posEnd = 0;
 					posEnd = event.changedTouches[0].pageY; //获取终点坐标
@@ -564,7 +551,6 @@
 							_this.save();
 						}
 					} else {
-						console.log("取消发送");
 						console.log("Cancel");
 					};
 				});
@@ -615,15 +601,12 @@
 				var r = new FileReader();
 				r.readAsArrayBuffer(b);
 				r.onload = function() {
-					console.log(type)
-					console.log(s)
 					ws.send(new Blob([type, s]));
 				}
 			},
 			touchmoveDown() { // 如果手指有移动，则取消所有事件，此时说明用户只是要移动而不是长按
 				let _this = this
 				this.$nextTick(function() {
-					console.log('hhhhhhhhhhhhhhhhhhhh')
 					let msg = document.getElementById('content') // 获取对象
 					console.log(msg.scrollTop)
 					if(msg.scrollTop < 100) {
@@ -662,9 +645,6 @@
 							}
 						}
 						this.chatLists = res.content.concat(this.chatLists);
-//						this.chatLists.forEach(function(l) {
-//							_this.$set(l, "duration", '16');
-//						});
 						console.log(this.chatLists)
 						this.loadingShow = false
 						this.move = true
@@ -673,7 +653,6 @@
 							return;
 						}
 						this.$nextTick(function() {
-							console.log('还能能女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女女')
 							let msg = document.getElementById('content') // 获取对象
 							let innerHeight = document.querySelector('.content').clientHeight
 							// 变量scrollTop是滚动条滚动时，距离顶部的距离
@@ -714,7 +693,6 @@
 						reader.onload = function(evnt) {
 							str = reader.result; //内容就在这里
 							var f = JSON.parse(str.substring(1))
-							console.log(f)
 							//console.log(str)
 							obj = {
 								direction: 1,
@@ -809,7 +787,6 @@
 					let obj = {}
 					let arrObj = {}
 					if(res.code == '0000') {
-						console.log(res.content.audioTime)
 						this.galleryShow = false
 						obj = {
 							direction: 2,
@@ -824,11 +801,7 @@
 						}
 						let len = this.arr.length - 1;
 						if(len > 0) {
-							console.log(this.arr)
-							console.log(this.arr[0].content)
-							console.log(this.arr[len].content)
 							if(new Date(this.arr[0].createTime).getTime() - new Date(this.arr[len].createTime).getTime() < 10000) {
-								console.log('尽力啊没有')
 								arrObj = {
 									direction: 2,
 									type: type,
@@ -899,7 +872,6 @@
 						let length = _this.chatLists.length
 						if(!_this.chatLists[length - 1].status) {
 							setTimeout(function() {
-								console.log('定时器执行了没有')
 								if(!_this.chatLists[length - 1].status) {
 									_this.chatLists[length - 1].status = true
 									_this.chatLists[length - 1].error = true
@@ -940,14 +912,13 @@
 				}
 				//判断[]中括号里是否是数字
 				text = text.replace(/\[[\d]{1,3}\]/gi, function(word) {
-					console.log(word)
 					var newWord = word.replace(/\[|\]/gi, ''); //去掉[]符号
 					var index = list.indexOf(newWord) + 1;
 					var imgHTML = '';
 					if(index <= 0) {
 						return word;
 					} else {
-						var path = 'http://99.48.68.109:92';
+						var path = 'http://99.48.66.107:92';
 						imgHTML = `<img class="static-emotion-gif" style="vertical-align: middle" src="${path}/emotion/${index}.png">`
 						return imgHTML;
 					}
@@ -978,7 +949,7 @@
 					}
 				}
 				this.result = result
-
+				console.log(result)
 				let resObj = {
 					content: result,
 					fromUserId: this.id,
@@ -1000,9 +971,6 @@
 				//console.log(this.arr)
 				let len = this.arr.length - 1;
 				if(len > 0) {
-					console.log(this.arr)
-					console.log(this.arr[0].content)
-					console.log(this.arr[len].content)
 					if(new Date(this.arr[0].createTime).getTime() - new Date(this.arr[len].createTime).getTime() > 10000) {
 						arrObj = {
 							direction: 2,

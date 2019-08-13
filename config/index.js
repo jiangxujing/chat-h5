@@ -39,7 +39,7 @@ module.exports = {
 
     // Paths
     assetsRoot: path.resolve(__dirname, '../dist'),
-    assetsSubDirectory: 'commerce-h5-static',
+    assetsSubDirectory: 'chat-h5-static',
     assetsPublicPath: '/',
 
     /**

@@ -7,7 +7,7 @@ Vue.use(Router)
 
 export default new Router({
 	mode: 'history',
-	base:'/commerce-h5/', //为了配置产线找不到静态文件添加
+	base:'/chat-h5/', //为了配置产线找不到静态文件添加
   routes: [
     {
       path: '/chat',
