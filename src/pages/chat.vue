@@ -628,8 +628,14 @@
 				api.post(api.getUrl('getListMemberChat'), req).then(res => {
 					let _this = this
 					if(res.code == '0000') {
-						let arr = res.content.reverse();
+						if(res.content && res.content.length > 0){
+							let arr = res.content.reverse();
 						arr.forEach(function(i) {
+							if(i.direction == 2){
+								_this.myHeadIcon = i.headIcon
+							}else if(i.direction == 1){
+								_this.friendIcon = i.headIcon
+							}
 							_this.$set(i, 'status', true);
 							_this.$set(i, 'timer', true);
 						});
@@ -662,7 +668,13 @@
 							//msg.scrollTop = innerHeight + scrollHeight + scrollTop+500
 							msg.scrollTop = scrollHeight + scrollTop
 						})
+					}else{
+						_this.myHeadIcon = sessionStorage.getItem('myHeadIcon')
+						_this.friendIcon = sessionStorage.getItem('headIcon')
+						
 					}
+						}
+						
 				})
 			},
 			init() {
@@ -699,7 +711,7 @@
 								type: str.substring(0, 1),
 								content: f.content,
 								createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-								headIcon: require('../images/wyz.jpg')
+								headIcon: _this.friendIcon
 							}
 							_this.arr.push(obj)
 							for(var i = 0; i < _this.arr.length; i++) {
@@ -709,7 +721,7 @@
 											direction: 1,
 											type: str.substring(0, 1),
 											content: f.content,
-											headIcon: require('../images/wyz.jpg'),
+											headIcon: _this.friendIcon,
 											audioTime:f.audioTime,
 											timer: false
 										}
@@ -720,7 +732,7 @@
 											content: f.content,
 											createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 											audioTime:f.audioTime,
-											headIcon: require('../images/wyz.jpg'),
+											headIcon: _this.friendIcon,
 											timer: true
 										}
 									}
@@ -730,7 +742,7 @@
 										type: str.substring(0, 1),
 										content: f.content,
 										createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-										headIcon: require('../images/wyz.jpg'),
+										headIcon: _this.friendIcon,
 										audioTime:f.audioTime,
 										timer: true
 									}
@@ -793,7 +805,7 @@
 							type: type,
 							content: res.content,
 							createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-							headIcon: require('../images/wyz.jpg')
+							headIcon: this.myHeadIcon
 						}
 						this.arr.push(obj)
 						if(this.chatLists && this.chatLists.length > 0) {
@@ -806,7 +818,7 @@
 									direction: 2,
 									type: type,
 									content: res.content.fileName,
-									headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
+									headIcon: this.myHeadIcon,
 									status: false,
 									error: false,
 									timer: false,
@@ -818,7 +830,7 @@
 									type: type,
 									content: res.content.fileName,
 									createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-									headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
+									headIcon:this.myHeadIcon,
 									status: false,
 									error: false,
 									timer: true,
@@ -831,7 +843,7 @@
 								type: type,
 								content: res.content.fileName,
 								createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-								headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
+								headIcon: this.myHeadIcon,
 								status: false,
 								error: false,
 								timer: true,
@@ -975,7 +987,7 @@
 							direction: 2,
 							type: 1,
 							content: result,
-							headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
+							headIcon: this.myHeadIcon,
 							createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 							status: false,
 							error: false,
@@ -987,7 +999,7 @@
 							type: 1,
 							content: result,
 							createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-							headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
+						headIcon: this.myHeadIcon,
 							status: false,
 							error: false,
 							timer: false
@@ -999,7 +1011,7 @@
 						type: 1,
 						content: result,
 						createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
-						headIcon: this.ownerAvatarUrl || require('../images/wyz.jpg'),
+						headIcon: this.myHeadIcon,
 						status: false,
 						error: false,
 						timer: true

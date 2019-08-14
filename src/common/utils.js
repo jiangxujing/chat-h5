@@ -757,7 +757,7 @@ export const getWebsocketURL = () =>{
   }else if(hostname == '99.48.68.109:92'){
     websocketurl = 'ws://99.48.68.111:8092'
   }else{
-  	 websocketurl = 'wss://47.103.71.143:8092'
+  	 websocketurl = 'wss://www.moutechs.com'
   }
   return websocketurl
 }

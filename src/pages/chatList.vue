@@ -2,9 +2,9 @@
 	<div class="chatList">
 		<div  style="height:100%;overflow-y:scroll;">
 			<mt-loadmore :top-method="loadTop" :autoFill="false" :bottom-method="loadBottom" :bottom-all-loaded="allLoaded" ref="loadmore">
-			<div class="chat-main" v-for="(i,index) in chatLists" @click="openChat(i.nickName,i.id,i.memberIdTo)" :key="index">
+			<div class="chat-main" v-for="(i,index) in chatLists" @click="openChat(i.nickName,i.id,i.memberIdTo,i)" :key="index">
 				<div style="flex:1">
-					<img :src="i.headIcon" class="touxiang" />
+					<img :src="prefix+i.headIcon" class="touxiang" />
 					<div class="info">
 						<div class="name">{{i.nickName}}</div>
 						<div style="margin-top:0.8rem" class="fontStyle">{{i.latestMessage}}</div>
@@ -30,7 +30,8 @@
 			return {
 				allLoaded: false,
 				chatLists: [],
-				pageNo: 0
+				pageNo: 0,
+				prefix: '/chat/storage/display/'
 			}
 		},
 		methods: {
@@ -64,7 +65,10 @@
 					}
 				})
 			},
-			openChat(name,id,memberIdTo) {
+			openChat(name,id,memberIdTo,i) {
+				sessionStorage.setItem('headIcon',i.headIcon)
+				sessionStorage.setItem('myHeadIcon',i.myHeadIcon)
+				if(!!sessionStorage.getItem('toolType')){
 					api.setupWebViewJavascriptBridge(function(bridge) {
 						let params = {
 							jumpUrl: _utils.getBrowserURL+"/chat?id=" + id+'&memberIdTo='+memberIdTo,
@@ -74,8 +78,9 @@
 							console.log(data)
 						})
 					})
-					console.log(params.jumpUrl)
-				//this.$router.push("/chat?id=" + id+'&memberIdTo='+memberIdTo)
+				}else{
+					this.$router.push("/chat?id=" + id+'&memberIdTo='+memberIdTo)
+				}
 			}
 		},
 		mounted() {
