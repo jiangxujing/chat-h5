@@ -428,7 +428,7 @@
 				loadingShow: false,
 				chatRecord: [],
 				recodeList: [],
-				prefix: 'http://99.48.68.111:8092/chat/storage/display/'
+				prefix: '/chat/storage/display/'
 			}
 		},
 		mounted() {
@@ -857,7 +857,6 @@
 					let length = this.chatLists.length
 					if(!this.chatLists[length - 1].status) {
 						_this.timemessage = setTimeout(function() {
-							Toast('ffffff')
 							if(!_this.chatLists[length - 1].status) {
 								_this.chatLists[length - 1].status = true
 								_this.chatLists[length - 1].error = true
@@ -918,7 +917,7 @@
 					if(index <= 0) {
 						return word;
 					} else {
-						var path = 'http://99.48.66.107:92';
+						var path = _utils.getBrowserURL;
 						imgHTML = `<img class="static-emotion-gif" style="vertical-align: middle" src="${path}/emotion/${index}.png">`
 						return imgHTML;
 					}

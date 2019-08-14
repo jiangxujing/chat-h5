@@ -750,28 +750,28 @@ export const formatMoney = (row, column) => {
 export const getWebsocketURL = () =>{
   var websocketurl = ''
   let hostname = window.location.host
- 	if(hostname == 'localhost:8087'){
+ 	if(hostname == 'localhost:8080'){
   	websocketurl = 'ws://99.48.68.111:8092'
   }else if(hostname == '99.48.68.95'){
   	websocketurl = 'ws://99.48.68.111:8092'
   }else if(hostname == '99.48.68.109:92'){
     websocketurl = 'ws://99.48.68.111:8092'
   }else{
-  	 websocketurl = 'ws://99.48.68.111:8092'
+  	 websocketurl = 'wss://47.103.71.143:8092'
   }
   return websocketurl
 }
 export const getBrowserURL = () =>{
   var browserUrl = ''
   let hostname = window.location.host
- 	if(hostname == 'localhost:8087'){
+ 	if(hostname == 'localhost:8080'){
   	browserUrl = 'http://99.48.68.95:8082'
   }else if(hostname == '99.48.68.95'){
   	browserUrl = 'http://99.48.68.95:8082'
   }else if(hostname == '99.48.66.107:92'){
-    browserUrl = 'http://99.48.68.95:8082'
+    browserUrl = 'http://99.48.66.107:92'
   }else{
-  	 browserUrl = 'http://99.48.68.95:8082'
+  	 browserUrl = 'https://www.moutechs.com/chat-h5'
   }
   return browserUrl
 }

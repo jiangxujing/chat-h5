@@ -74,7 +74,8 @@
 							console.log(data)
 						})
 					})
-				this.$router.push("/chat?id=" + id+'&memberIdTo='+memberIdTo)
+					console.log(params.jumpUrl)
+				//this.$router.push("/chat?id=" + id+'&memberIdTo='+memberIdTo)
 			}
 		},
 		mounted() {
