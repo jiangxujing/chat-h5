@@ -543,8 +543,8 @@
 						if((_this.timeEnd - _this.timeStart) < 500) {
 							//只是点击一下就松开了
 							clearTimeout(_this.timeOutEvent);
-						} else if((_this.timeEnd - _this.timeStart) < 1000) {
-							//Toast('录制时间太短')
+						} else if((_this.timeEnd - _this.timeStart) < 1500) {
+							Toast('录制时间太短')
 							clearTimeout(_this.timeOutEvent);
 						}else {
 							_this.duration = parseInt((_this.timeEnd - _this.timeStart) / 1000)
