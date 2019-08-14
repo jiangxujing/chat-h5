@@ -68,7 +68,7 @@
 			openChat(name,id,memberIdTo,i) {
 				sessionStorage.setItem('headIcon',i.headIcon)
 				sessionStorage.setItem('myHeadIcon',i.myHeadIcon)
-				if(!!sessionStorage.getItem('toolType')){
+				if(sessionStorage.getItem('toolType') > 0){
 					api.setupWebViewJavascriptBridge(function(bridge) {
 						let params = {
 							jumpUrl: _utils.getBrowserURL+"/chat?id=" + id+'&memberIdTo='+memberIdTo,
