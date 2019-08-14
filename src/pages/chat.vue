@@ -483,7 +483,7 @@
 					this.recorder.stop()
 					// 重置说话时间
 					this.num = 60
-					this.voiceValue = '按住说话（' + this.num + '秒）'
+					//this.voiceValue = '按住说话（' + this.num + '秒）'
 					// 获取语音二进制文件
 					let bold = this.recorder.getBlob()
 					// 将获取的二进制对象转为二进制文件流
@@ -583,7 +583,7 @@
 									_this.clearTimer()
 								} else {
 									 this.num--
-                					_this.voiceValue = '松开结束（' + _this.num + '秒）'
+                					//_this.voiceValue = '松开结束（' + _this.num + '秒）'
 									_this.recorder.start()
 								}
 							}, 1000)
