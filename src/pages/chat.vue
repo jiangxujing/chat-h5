@@ -441,6 +441,7 @@
 		methods: {
 			getRecord() {
 				this.recordShow = true
+				this.expressionShow = false
 			},
 			getText() {
 				this.recordShow = false
@@ -1057,6 +1058,7 @@
 				this.sendBtnShow = true
 			},
 			openExpression() {
+				this.recordShow = false
 				this.expressionShow = !this.expressionShow
 				if(this.expressionShow == false) {
 					this.$refs.input.focus();
