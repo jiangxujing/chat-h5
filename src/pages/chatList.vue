@@ -71,7 +71,7 @@
 				if(sessionStorage.getItem('toolType') > 0){
 					api.setupWebViewJavascriptBridge(function(bridge) {
 						let params = {
-							jumpUrl: _utils.getBrowserURL+"/chat?id=" + id+'&memberIdTo='+memberIdTo,
+							jumpUrl: _utils.getBrowserURL()+"/chat?id=" + id+'&memberIdTo='+memberIdTo,
 							nickName:name
 						}
 						bridge.callHandler('openChat', params, (data) => {
