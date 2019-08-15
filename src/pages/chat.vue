@@ -1274,6 +1274,7 @@
 			left: 0;
 			top: 0;
 			background: #000;
+			z-index:2;
 			img {
 				width: 100%;
 				margin: auto;
