@@ -2,7 +2,6 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import chat from '@/pages/chat'
 import chatList from '@/pages/chatList'
-import record from '@/pages/record'
 Vue.use(Router)
 
 export default new Router({
@@ -17,10 +16,6 @@ export default new Router({
       path: '/chatList',
       name: 'chatList',
       component: chatList
-    },{
-    	 path: '/record',
-      name: 'record',
-      component: record
     }
   ]
 })
