@@ -79,12 +79,14 @@
 						})
 					})
 				}else{
-					this.$router.push("/chat?id=" + id+'&memberIdTo='+memberIdTo)
+					this.$router.push("/chat?id=" + id+'&memberIdTo='+memberIdTo+'&token='+this.token)
 				}
 			}
 		},
 		mounted() {
 			let token =  this.$route.query.token
+			this.token = token
+			console.log(this.token)
 			let toolType = this.$route.query.toolType
 			sessionStorage.setItem('token',token)
 			sessionStorage.setItem('toolType',toolType)

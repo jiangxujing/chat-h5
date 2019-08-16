@@ -437,7 +437,9 @@
 		},
 		mounted() {
 			this.id = this.$route.query.id
+			let token = this.$route.query.token
 			this.memberIdTo = this.$route.query.memberIdTo
+			sessionStorage.setItem('token',token)
 			this.init()
 			this.getListMemberChat()
 			this.initEvent()
