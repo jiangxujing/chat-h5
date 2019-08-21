@@ -75,7 +75,22 @@ let crypts = {
 
 let cookiePosBegin = -1
 let cookiePosEnd = -1
-
+export const getWebsocketURL = () =>{
+  var websocketurl = ''
+  let hostname = window.location.host
+ 	if(hostname == 'localhost:8088'){
+  	websocketurl = 'ws://99.48.68.111:8092'
+  }else if(hostname == '99.48.68.95'){
+  	websocketurl = 'ws://99.48.68.111:8092'
+  }else if(hostname == '99.48.68.107:92'){
+    websocketurl = 'ws://99.48.68.111:8092'
+  }else if(hostname == '99.48.68.102:92'){
+    websocketurl = 'ws://99.48.68.111:8092'
+  }else{
+  	 websocketurl = 'wss://www.moutechs.com'
+  }
+  return websocketurl
+}
 export const validator = (val, type) => {
 	if(type === 'idNum') {
 		return regFunc.idNum(val)
@@ -747,20 +762,6 @@ export const formatMoney = (row, column) => {
 	}
 	return val
 }
-export const getWebsocketURL = () =>{
-  var websocketurl = ''
-  let hostname = window.location.host
- 	if(hostname == 'localhost:8080'){
-  	websocketurl = 'ws://99.48.68.111:8092'
-  }else if(hostname == '99.48.68.95'){
-  	websocketurl = 'ws://99.48.68.111:8092'
-  }else if(hostname == '99.48.68.109:92'){
-    websocketurl = 'ws://99.48.68.111:8092'
-  }else{
-  	 websocketurl = 'wss://www.moutechs.com'
-  }
-  return websocketurl
-}
 export const getBrowserURL = () =>{
   var browserUrl = ''
   let hostname = window.location.host
@@ -807,6 +808,7 @@ export default {
 		var date = row[column.property];
 		return date ? dateFormatter(new Date(date).getTime(), 'yyyy-MM-dd HH:mm:ss') : '/';
 	},
+	getWebsocketURL,
 	validator,
 	dateFormatter,
 	storageCan,
@@ -832,7 +834,6 @@ export default {
 	getproductStatusVal,
 	getReturnStatusVal,
 	formatMoney,
-	getWebsocketURL,
 	getBrowserURL,
 	toEmotion,
 	formatTime
