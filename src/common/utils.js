@@ -78,11 +78,11 @@ let cookiePosEnd = -1
 export const getWebsocketURL = () =>{
   var websocketurl = ''
   let hostname = window.location.host
- 	if(hostname == 'localhost:8088'){
+ 	if(hostname == 'localhost:8082'){
   	websocketurl = 'ws://99.48.68.111:8092'
   }else if(hostname == '99.48.68.95'){
   	websocketurl = 'ws://99.48.68.111:8092'
-  }else if(hostname == '99.48.68.107:92'){
+  }else if(hostname == '99.48.66.107:92'){
     websocketurl = 'ws://99.48.68.111:8092'
   }else if(hostname == '99.48.68.102:92'){
     websocketurl = 'ws://99.48.68.111:8092'

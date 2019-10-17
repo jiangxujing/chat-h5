@@ -175,12 +175,12 @@
 			</div>
 			<div class="galleryWrapper" v-if="galleryShow">
 				<div>
-					<img src="../images/tupian.png" />
-					<input type="file" class="file" accept="image/*" @change="tirggerFile($event)" />
+					<img src="../images/tupian.png" @click="getPhoto"/>
+					<!--<input type="file" class="file" accept="image/*" @change="tirggerFile($event)" />-->
 				</div>
 				<div>
-					<img src="../images/paizhao.png" />
-					<input type="file" capture="camera" class="file" accept="image/*" @change="tirggerPhoto($event)" />
+					<img src="../images/paizhao.png" @click="getCamera"/>
+				<!--	<input type="file" capture="camera" class="file" accept="image/*" @change="tirggerPhoto($event)" />-->
 				</div>
 			</div>
 		</div>
@@ -449,6 +449,20 @@
 				this.recordShow = true
 				this.expressionShow = false
 			},
+			getCamera(){
+				api.setupWebViewJavascriptBridge(function(bridge) {
+					bridge.callHandler('getCamera', {}, (data) => {
+						_this.sendPic(data, 2)
+					})
+				}) 
+			},
+			getPhoto(){
+				api.setupWebViewJavascriptBridge(function(bridge) {
+					bridge.callHandler('getPhoto', {}, (data) => {
+						_this.sendPic(data, 2)
+					})
+				}) 
+			},
 			getText() {
 				this.recordShow = false
 			},
@@ -486,22 +500,24 @@
 				this.clearTimer()
 				this.recordIng = false
 				this.endTime = new Date().getTime()
-				if(this.recorder) {
-					this.recorder.stop()
-					// 重置说话时间
-					this.num = 60
-					//this.voiceValue = '按住说话（' + this.num + '秒）'
-					// 获取语音二进制文件
-					let bold = this.recorder.getBlob()
-					// 将获取的二进制对象转为二进制文件流
-					let files = new File([bold], 'test.mp3', {
-						type: 'audio/mp3',
-						lastModified: Date.now()
-					})
-					let fd = new FormData()
-					fd.append('file', files)
-					this.sendPic(fd, 3)
-				}
+				let _this = this
+				this.sendPic(this.params, 3)
+//				if(this.recorder) {
+//					this.recorder.stop()
+//					// 重置说话时间
+//					this.num = 60
+//					//this.voiceValue = '按住说话（' + this.num + '秒）'
+//					// 获取语音二进制文件
+//					let bold = this.recorder.getBlob()
+//					// 将获取的二进制对象转为二进制文件流
+//					let files = new File([bold], 'test.mp3', {
+//						type: 'audio/mp3',
+//						lastModified: Date.now()
+//					})
+//					let fd = new FormData()
+//					fd.append('file', files)
+//					this.sendPic(fd, 3)
+//				}
 			},
 			initEvent() {
 				let _this = this
@@ -515,7 +531,12 @@
 					btnElem.value = '松开 结束';
 					console.log("start");
 					console.log(posStart + '---------开始坐标');
-					_this.mouseStart()
+					api.setupWebViewJavascriptBridge(function(bridge) {
+						bridge.callHandler('getRecordStart', params, (data) => {
+							console.log(data)
+						})
+					})  
+					//_this.mouseStart()
 					_this.timeOutEvent = setTimeout(function() {
 						_this.recordIng = true
 					}, 500);
@@ -535,6 +556,12 @@
 					}
 				});
 				btnElem.addEventListener("touchend", function(event) {
+					console.log('手指松开')
+					api.setupWebViewJavascriptBridge(function(bridge) {
+						bridge.callHandler('getRecordEnd', params, (data) => {
+							_this.params = params;
+						})
+					})  
 					_this.clearTimer()
 					_this.slideUp = false
 					_this.recordIng = false
@@ -612,6 +639,7 @@
 				}
 			},
 			touchmoveDown() { // 如果手指有移动，则取消所有事件，此时说明用户只是要移动而不是长按
+				console.log('fg')
 				let _this = this
 				this.$nextTick(function() {
 					let msg = document.getElementById('content') // 获取对象
@@ -802,15 +830,16 @@
 				this.galleryShow = false
 			},
 			sendPic(params, type) {
-				api.upload(api.getUrl('upload'), params).then(res => {
+				//api.upload(api.getUrl('upload'), params).then(res => {
 					let obj = {}
 					let arrObj = {}
-					if(res.code == '0000') {
+					Toast(params)
+					//if(res.code == '0000') {
 						this.galleryShow = false
 						obj = {
 							direction: 2,
 							type: type,
-							content: res.content,
+							content: params,
 							createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 							headIcon: this.myHeadIcon
 						}
@@ -824,43 +853,43 @@
 								arrObj = {
 									direction: 2,
 									type: type,
-									content: res.content.fileName,
+									content: params,
 									headIcon: this.myHeadIcon,
 									status: false,
 									error: false,
 									timer: false,
-									audioTime: res.content.audioTime
+									audioTime: params.audioTime
 								}
 							} else {
 								arrObj = {
 									direction: 2,
 									type: type,
-									content: res.content.fileName,
+									content: params,
 									createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 									headIcon:this.myHeadIcon,
 									status: false,
 									error: false,
 									timer: true,
-									audioTime: res.content.audioTime
+									audioTime: params.audioTime
 								}
 							}
 						} else {
 							arrObj = {
 								direction: 2,
 								type: type,
-								content: res.content.fileName,
+								content:params.fileName ,
 								createTime: _utils.dateFormatter(new Date(), "yyyy-MM-dd HH:mm:ss"),
 								headIcon: this.myHeadIcon,
 								status: false,
 								error: false,
 								timer: true,
-								audioTime: res.content.audioTime
+								audioTime: params.audioTime
 							}
 						}
 
 						this.chatLists.push(arrObj)
 						console.log(this.chatLists)
-					}
+					//}
 					this.$nextTick(() => {
 						let msg = document.getElementById('content') // 获取对象
 						msg.scrollTop = msg.scrollHeight // 滚动高度
@@ -897,7 +926,7 @@
 							}, 3000);
 						}
 					}
-				})
+				//})
 			},
 			tirggerFile(event, file) {
 				this.formData = new FormData()

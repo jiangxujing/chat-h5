@@ -17,7 +17,8 @@ module.exports = {
 //      changeOrigin: false,
 //    }, 
       '/chat/**': {
-        target: 'http://99.48.68.111:8092', // 你接口的域名
+        target: 'http://99.48.68.111:8092', // 你接口的域名sit
+        //target: 'http://47.103.71.143:8092', // 你接口的域名
         secure: false,
         changeOrigin: false,
       }
